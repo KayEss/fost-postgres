@@ -5,6 +5,7 @@ lib fost-postgres
         ../../../Boost//boost-thread-dll
         ../../../fost-base/Cpp/fost-core/
         ../../../fost-orm/Cpp/fost-schema/
+        ../../../fost-orm/Cpp/fost-sql/
         ../fost-pqxx/
         base-driver.cpp
     :

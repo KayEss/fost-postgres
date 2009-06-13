@@ -6,7 +6,7 @@
 */
 
 
-#include <fost/db-driver>
+#include <fost/db-driver-sql>
 #include <fost/exception/transaction_fault.hpp>
 #include <fost/exception/unexpected_eof.hpp>
 
@@ -18,10 +18,10 @@
 namespace {
 
 
-    const class pqInterface : public fostlib::dbinterface {
+    const class pqInterface : public fostlib::sql_driver {
     public:
         pqInterface()
-        : dbinterface( L"pqxx" ) {
+        : sql_driver( L"pqxx" ) {
         }
 
         void create_database( fostlib::dbconnection &dbc, const fostlib::string &name ) const;
