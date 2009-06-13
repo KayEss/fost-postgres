@@ -1,0 +1,11 @@
+
+lib fost-schema
+    :
+        ../../../Boost//boost-date_time-dll
+        ../../../Boost//boost-thread-dll
+        ../../../fost-base/Cpp/fost-core/
+        base-driver.cpp
+    :
+        <include>../include
+    ;
+
