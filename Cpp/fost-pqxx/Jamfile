@@ -1,0 +1,12 @@
+import path ;
+
+lib libpq : : <name>pq ;
+
+lib fost-pqxx
+    :
+        libpq
+        [ path.glob $(TOP)/../PostgreSQL/libpqxx/src/ : *.cxx ]
+    :
+        <target-os>linux:<include>/usr/include/postgresql
+        <include>../../../PostgreSQL/libpqxx/include
+    ;
