@@ -18,7 +18,7 @@
 namespace {
 
 
-    const class pqInterface : public fostlib::sql_driver {
+    FSL_EXPORT const class pqInterface : public fostlib::sql_driver {
     public:
         pqInterface()
         : sql_driver( L"pqxx" ) {

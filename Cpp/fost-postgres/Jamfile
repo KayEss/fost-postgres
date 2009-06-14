@@ -12,3 +12,10 @@ lib fost-postgres
         <include>../include
     ;
 
+install ../../../dist/lib
+    :
+        fost-postgres
+    :
+        <install-dependencies>on
+        <install-type>LIB
+    ;

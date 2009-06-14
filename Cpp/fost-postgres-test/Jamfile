@@ -8,7 +8,7 @@ lib fost-postgres-test-smoke
         ../../../Boost//boost-thread-dll
         ../../../fost-base/Cpp/fost-core/
         ../../../fost-base/Cpp/fost-test/
-        ../fost-postgres/
+        ../../../fost-orm/Cpp/fost-schema/
         basic.cpp
     :
         <include>../include

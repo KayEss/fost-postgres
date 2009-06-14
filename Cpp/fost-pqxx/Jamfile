@@ -1,12 +1,20 @@
 import path ;
 
-lib libpq : : <name>pq ;
-
 lib fost-pqxx
     :
-        libpq
+        ../../../fost-base/External//winsock
+        ../../../PostgreSQL//comerr32
+        ../../../PostgreSQL//gssapi32
+        ../../../PostgreSQL//k5sprt32
+        ../../../PostgreSQL//krb5_32
+        ../../../PostgreSQL//libiconv2
+        ../../../PostgreSQL//libintl3
+        ../../../PostgreSQL//libpq
         [ path.glob $(TOP)/../PostgreSQL/libpqxx/src/ : *.cxx ]
     :
         <target-os>linux:<include>/usr/include/postgresql
-        <include>../../../PostgreSQL/libpqxx/include
+
+        <target-os>windows:<define>_CRT_SECURE_NO_WARNINGS
+        <target-os>windows:<define>PQXX_SHARED
+        <target-os>windows:<define>PQXX_INTERNAL
     ;
