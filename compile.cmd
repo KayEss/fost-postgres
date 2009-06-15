@@ -6,9 +6,9 @@ IF NOT ERRORLEVEL 1 (
 )
 
 IF NOT ERRORLEVEL 1 (
-    ..\dist\bin\fost-schema-test-dyndriver pqxx fost-postgres.dll -d "user=Test password=tester host=localhost"
+    ..\dist\bin\fost-schema-test-dyndriver -b false pqxx fost-postgres.dll -d "user=Test password=tester host=localhost dbname=postgres"
 )
 
 IF NOT ERRORLEVEL 1 (
-    ..\dist\bin\ftest -b false ..\dist\bin\fost-postgres-test-smoke.dll
+    ..\dist\bin\ftest -b false -i Configuration/postgres-windows.ini ..\dist\bin\fost-postgres-test-smoke.dll
 )

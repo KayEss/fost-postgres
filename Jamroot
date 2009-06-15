@@ -33,5 +33,6 @@ project
     ;
 
 build-project ../fost-base/Cpp/fost-ftest/ ;
+build-project ../fost-orm/Cpp/fost-schema-test//fost-schema-test-dyndriver ;
 build-project Cpp/fost-postgres/ ;
 build-project Cpp/fost-postgres-test/ ;
