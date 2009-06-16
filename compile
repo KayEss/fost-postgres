@@ -13,10 +13,16 @@ fi
 
 if ../bjam -j`grep -c ^processor /proc/cpuinfo` toolset=gcc $VARIANTS
 then {
-    if ../dist/bin/ftest -b false -i Configuration/postgres-linux.ini \
-        libfost-postgres-test-smoke.so
+    if ../dist/bin/fost-schema-test-dyndriver pqxx libfost-postgres.so -d "user=Test password=tester host=localhost dbname=postgres"
     then {
-        echo fost-orm smoke tests passed
+        if ../dist/bin/ftest -b false -i Configuration/postgres-linux.ini \
+            libfost-postgres-test-smoke.so
+        then {
+            echo fost-orm smoke tests passed
+        } else {
+            exit 1
+        }
+        fi
     } else {
         exit 1
     }
