@@ -19,7 +19,7 @@ namespace {
 
 
     const setting< string > read_dsn( L"fost-postgres-test/basic.cpp", L"Postgres tests", L"Read connection", L"pqxx/user=Test password=tester host=localhost", true );
-    const setting< string > write_dsn( L"fost-postgres-test/basic.cpp", L"Postgres tests", L"Read connection", L"pqxx/user=Test password=tester host=localhost", true );
+    const setting< string > write_dsn( L"fost-postgres-test/basic.cpp", L"Postgres tests", L"Write connection", L"pqxx/user=Test password=tester host=localhost", true );
 
 
 }
