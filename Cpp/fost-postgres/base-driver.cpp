@@ -32,6 +32,16 @@ namespace {
         void used_id( fostlib::dbconnection &dbc, const fostlib::string &counter, int64_t value ) const;
 
         boost::shared_ptr< fostlib::dbinterface::read > reader( fostlib::dbconnection &dbc ) const;
+
+    protected:
+        fostlib::sql::statement mangle( const fostlib::sql::table_name &name ) const {
+            fostlib::sql::statement quote( L"\"" );
+            return quote + fostlib::sql::statement( name.underlying(), fostlib::sql::statement::encoded ) + quote;
+        }
+        fostlib::sql::statement mangle( const fostlib::sql::column_name &name ) const {
+            fostlib::sql::statement quote( L"\"" );
+            return quote + fostlib::sql::statement( name.underlying(), fostlib::sql::statement::encoded ) + quote;
+        }
     } c_pqxx_interface;
 
 
@@ -56,7 +66,7 @@ namespace {
         }
 
         boost::shared_ptr< fostlib::dbinterface::recordset > query( const fostlib::meta_instance &item, const fostlib::json &key ) const;
-        boost::shared_ptr< fostlib::dbinterface::recordset > query( const fostlib::string &command ) const;
+        boost::shared_ptr< fostlib::dbinterface::recordset > query( const fostlib::sql::statement &command ) const;
 
         boost::shared_ptr< fostlib::dbinterface::write > writer();
     };
@@ -68,9 +78,9 @@ namespace {
         std::vector< fostlib::string > m_names;
         mutable std::map< pqxx::result::tuple::size_type, fostlib::nullable< fostlib::json > > m_fields;
     public:
-        pqRecordset( const fostlib::dbconnection &dbc, const pqRead &reader, const fostlib::string &cmd )
+        pqRecordset( const fostlib::dbconnection &dbc, const pqRead &reader, const fostlib::sql::statement &cmd )
         : fostlib::dbinterface::recordset( cmd ),
-            m_rs( reader.m_transaction->exec( fostlib::coerce< fostlib::utf8string >( cmd ) ) ),
+            m_rs( reader.m_transaction->exec( fostlib::coerce< fostlib::utf8string >( cmd.underlying() ) ) ),
             m_position( m_rs.begin() ),
             m_names( m_rs.columns() ) {
             for ( pqxx::result::tuple::size_type p( 0 ); p < m_rs.columns(); ++p )
@@ -123,7 +133,7 @@ namespace {
     };
 
 
-    class pqWrite : public fostlib::dbinterface::write {
+    class pqWrite : public fostlib::sql_driver::write {
         pqRead &m_reader;
         boost::scoped_ptr< pqxx::connection > m_pqcon;
         boost::scoped_ptr< pqxx::work > m_transaction;
@@ -135,16 +145,14 @@ namespace {
             m_transaction.reset( new pqxx::work( *m_pqcon ) );
         }
 
-        void create_table( const fostlib::meta_instance &definition );
-        void create_table( const fostlib::string &table, const std::list< std::pair< fostlib::string, fostlib::string > > &key, const std::list< std::pair< fostlib::string, fostlib::string > > &columns );
         void drop_table( const fostlib::meta_instance &definition );
         void drop_table( const fostlib::string &table );
 
         void insert( const fostlib::instance &object );
 
-        void execute( const fostlib::string &cmd ) {
+        void execute( const fostlib::sql::statement &cmd ) {
             try {
-                m_transaction->exec( fostlib::coerce< fostlib::utf8string >( cmd ) );
+                m_transaction->exec( fostlib::coerce< fostlib::utf8string >( cmd.underlying() ) );
             } catch ( std::exception &e ) {
                 throw fostlib::exceptions::transaction_fault( fostlib::string( e.what() ) );
             }
@@ -214,7 +222,7 @@ boost::shared_ptr< fostlib::dbinterface::recordset > pqRead::query( const fostli
 }
 
 
-boost::shared_ptr< fostlib::dbinterface::recordset > pqRead::query( const fostlib::string &command ) const {
+boost::shared_ptr< fostlib::dbinterface::recordset > pqRead::query( const fostlib::sql::statement &command ) const {
     return boost::shared_ptr< fostlib::dbinterface::recordset >( new pqRecordset( m_connection, *this, command ) );
 }
 
@@ -229,9 +237,6 @@ boost::shared_ptr< fostlib::dbinterface::write > pqRead::writer() {
 */
 
 
-void pqWrite::create_table(class fostlib::meta_instance const &) {
-    throw fostlib::exceptions::not_implemented( L"pqWrite::create_table(class fostlib::meta_instance const &)" );
-}
 void pqWrite::drop_table(class fostlib::meta_instance const &) {
     throw fostlib::exceptions::not_implemented( L"pqWrite::drop_table(class fostlib::meta_instance const &)" );
 }
@@ -240,19 +245,6 @@ void pqWrite::insert(class fostlib::instance const &) {
 }
 
 
-void pqWrite::create_table( const fostlib::string &table, const std::list< std::pair< fostlib::string, fostlib::string > > &key, const std::list< std::pair< fostlib::string, fostlib::string > > &columns ) {
-    fostlib::nullable< fostlib::string > cols, pk;
-    for ( std::list< std::pair< fostlib::string, fostlib::string > >::const_iterator it( key.begin() ); it != key.end(); ++it ) {
-        pk = concat( pk, L", ", L"\"" + it->first + L"\"" );
-        cols = concat( cols, L", ", L"\"" + it->first + L"\" " + it->second );
-    }
-    for ( std::list< std::pair< fostlib::string, fostlib::string > >::const_iterator it( columns.begin() ); it != columns.end(); ++it )
-        cols = concat( cols, L", ", L"\"" + it->first + L"\" " + it->second );
-    execute(
-            L"CREATE TABLE \"" + table + L"\"( " + cols.value() +
-            L", CONSTRAINT \"PK_" + table + L"\" PRIMARY KEY (" + pk.value() + L")"
-            L");" );
-}
 void pqWrite::drop_table( const fostlib::string &/*table*/ ) {
     throw fostlib::exceptions::not_implemented( L"void pqWrite::drop_table( const wstring &table ) const" );
 }

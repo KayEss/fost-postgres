@@ -39,19 +39,22 @@ FSL_TEST_FUNCTION( normal_statements ) {
 
     dbconnection dbc( read_dsn.value() + L" dbname=postgres", write_dsn.value() + L" dbname=postgres" );
 
-    recordset rs1( dbc.query( L"SELECT 1 WHERE 1=0" ) );
+    recordset rs1( dbc.query( sql::statement( L"SELECT 1 WHERE 1=0" ) ) );
     FSL_CHECK( rs1.eof() );
     FSL_CHECK_EQ( rs1.fields(), 1 );
-    FSL_CHECK_EQ( rs1.command(), L"SELECT 1 WHERE 1=0" );
+    FSL_CHECK_EQ( rs1.command(), sql::statement( L"SELECT 1 WHERE 1=0" ) );
 
-    recordset rs2( dbc.query( L"SELECT 1234 AS c0" ) );
+    recordset rs2( dbc.query( sql::statement( L"SELECT 1234 AS c0" ) ) );
     FSL_CHECK( !rs2.eof() );
     FSL_CHECK_EQ( coerce< int >( rs2.field( 0 ) ), 1234 );
     FSL_CHECK_EQ( coerce< int >( rs2.field( L"c0" ) ), 1234 );
     FSL_CHECK_EQ( rs2.name( 0 ), L"c0" );
 
-    recordset databases( dbc.query( L"SELECT * FROM pg_catalog.pg_database WHERE datname='FSL_Test'" ) );
-    if ( databases.eof() ) {
+    recordset databases( dbc.query( sql::statement( L"SELECT * FROM pg_catalog.pg_database WHERE datname='FSL_Test'" ) ) );
+    if ( !databases.eof() )
+        dbc.drop_database( L"FSL_Test" );
+
+    {
         dbc.create_database( L"FSL_Test" );
         dbconnection dbc( read_dsn.value() + L" dbname=FSL_Test", write_dsn.value() + L" dbname=FSL_Test" );
 
@@ -64,6 +67,7 @@ FSL_TEST_FUNCTION( normal_statements ) {
         transaction.create_table( test );
         transaction.commit();
     }
+
     FSL_CHECK( !dbc.in_transaction() );
 }
 
@@ -74,7 +78,7 @@ FSL_TEST_FUNCTION( transaction_safeguards ) {
     dbconnection dbc( read_dsn.value() + L" dbname=FSL_Test", write_dsn.value() + L" dbname=FSL_Test" );
     {
         dbtransaction transaction( dbc );
-        transaction.execute( L"DELETE FROM test" );
+        transaction.execute( sql::statement( L"DELETE FROM test" ) );
         transaction.commit();
     }
 
@@ -83,35 +87,35 @@ FSL_TEST_FUNCTION( transaction_safeguards ) {
 
         FSL_CHECK_EXCEPTION( fostlib::dbtransaction t2( dbc ), fostlib::exceptions::transaction_fault& );
 
-        transaction.execute( L"INSERT INTO test VALUES (1, 'Hello')" );
+        transaction.execute( sql::statement( L"INSERT INTO test VALUES (1, 'Hello')" ) );
         transaction.commit();
-        FSL_CHECK_EXCEPTION( transaction.execute( L"INSERT INTO test VALUES (2, 'Hello')" ), fostlib::exceptions::transaction_fault& );
+        FSL_CHECK_EXCEPTION( transaction.execute( sql::statement( L"INSERT INTO test VALUES (2, 'Hello')" ) ), fostlib::exceptions::transaction_fault& );
     }
-    FSL_CHECK_EQ( coerce< int >( dbc.query( L"SELECT COUNT(id) FROM test" ).field( 0 ) ), 1 );
+    FSL_CHECK_EQ( coerce< int >( dbc.query( sql::statement( L"SELECT COUNT(id) FROM test" ) ).field( 0 ) ), 1 );
 
     { // Check that a duplicate key results in an error
         dbtransaction transaction( dbc );
-        FSL_CHECK_EXCEPTION( transaction.execute( L"INSERT INTO test VALUES (1, 'Hello')" ), fostlib::exceptions::transaction_fault& );
+        FSL_CHECK_EXCEPTION( transaction.execute( sql::statement( L"INSERT INTO test VALUES (1, 'Hello')" ) ), fostlib::exceptions::transaction_fault& );
     }
-    FSL_CHECK_EQ( coerce< int >( dbc.query( L"SELECT COUNT(id) FROM test" ).field( 0 ) ), 1 );
+    FSL_CHECK_EQ( coerce< int >( dbc.query( sql::statement( L"SELECT COUNT(id) FROM test" ) ).field( 0 ) ), 1 );
 
     { // Check that a dropped transaction is aborted
         dbtransaction transaction( dbc );
-        transaction.execute( L"INSERT INTO test VALUES (2, 'Goodbye')" );
+        transaction.execute( sql::statement( L"INSERT INTO test VALUES (2, 'Goodbye')" ) );
     }
-    FSL_CHECK_EQ( coerce< int >( dbc.query( L"SELECT COUNT(id) FROM test" ).field( 0 ) ), 1 );
+    FSL_CHECK_EQ( coerce< int >( dbc.query( sql::statement( L"SELECT COUNT(id) FROM test" ) ).field( 0 ) ), 1 );
 
     { // Check that a transaction is isolated
         dbtransaction transaction( dbc );
-        transaction.execute( L"INSERT INTO test VALUES (2, 'Goodbye')" );
+        transaction.execute( sql::statement( L"INSERT INTO test VALUES (2, 'Goodbye')" ) );
 
         dbconnection cnx( read_dsn.value() + L" dbname=FSL_Test" );
-        FSL_CHECK_EQ( coerce< int >( cnx.query( L"SELECT COUNT(id) FROM test" ).field( 0 ) ), 1 );
+        FSL_CHECK_EQ( coerce< int >( cnx.query( sql::statement( L"SELECT COUNT(id) FROM test" ) ).field( 0 ) ), 1 );
         transaction.commit();
     }
-    FSL_CHECK_EQ( coerce< int >( dbc.query( L"SELECT COUNT(id) FROM test" ).field( 0 ) ), 2 );
+    FSL_CHECK_EQ( coerce< int >( dbc.query( sql::statement( L"SELECT COUNT(id) FROM test" ) ).field( 0 ) ), 2 );
 
-    recordset rs( dbc.query( L"SELECT id, name FROM test ORDER BY id ASC" ) );
+    recordset rs( dbc.query( sql::statement( L"SELECT id, name FROM test ORDER BY id ASC" ) ) );
     FSL_CHECK_EQ( coerce< int >( rs.field( 0 ) ), 1 );
     FSL_CHECK_EQ( coerce< string >( rs.field( 1 ) ), L"Hello" );
     rs.moveNext();
