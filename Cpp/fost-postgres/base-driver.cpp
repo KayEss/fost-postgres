@@ -36,11 +36,11 @@ namespace {
     protected:
         fostlib::sql::statement mangle( const fostlib::sql::table_name &name ) const {
             fostlib::sql::statement quote( L"\"" );
-            return quote + fostlib::sql::statement( name.underlying(), fostlib::sql::statement::encoded ) + quote;
+            return quote + fostlib::sql::statement( name.underlying() ) + quote;
         }
         fostlib::sql::statement mangle( const fostlib::sql::column_name &name ) const {
             fostlib::sql::statement quote( L"\"" );
-            return quote + fostlib::sql::statement( name.underlying(), fostlib::sql::statement::encoded ) + quote;
+            return quote + fostlib::sql::statement( name.underlying() ) + quote;
         }
     } c_pqxx_interface;
 
