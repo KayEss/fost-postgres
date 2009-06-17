@@ -2,17 +2,18 @@ import path ;
 
 lib fost-pqxx
     :
-        ../../../fost-base/External//winsock
-        ../../../PostgreSQL//comerr32
-        ../../../PostgreSQL//gssapi32
-        ../../../PostgreSQL//k5sprt32
-        ../../../PostgreSQL//krb5_32
-        ../../../PostgreSQL//libiconv2
-        ../../../PostgreSQL//libintl3
         ../../../PostgreSQL//libpq
         [ path.glob $(TOP)/../PostgreSQL/libpqxx/src/ : *.cxx ]
     :
         <target-os>linux:<include>/usr/include/postgresql
+
+        <target-os>windows:<source>../../../fost-base/External//winsock
+        <target-os>windows:<source>../../../PostgreSQL//comerr32
+        <target-os>windows:<source>../../../PostgreSQL//gssapi32
+        <target-os>windows:<source>../../../PostgreSQL//k5sprt32
+        <target-os>windows:<source>../../../PostgreSQL//krb5_32
+        <target-os>windows:<source>../../../PostgreSQL//libiconv2
+        <target-os>windows:<source>../../../PostgreSQL//libintl3
 
         <target-os>windows:<define>_CRT_SECURE_NO_WARNINGS
         <target-os>windows:<define>PQXX_SHARED
