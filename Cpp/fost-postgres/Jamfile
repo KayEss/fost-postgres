@@ -9,6 +9,7 @@ lib fost-postgres
         ../fost-pqxx/
         base-driver.cpp
     :
+        <define>PQXX_HAVE_BOOST
         <include>../include
     ;
 
