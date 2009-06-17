@@ -11,6 +11,8 @@ project
         <threading>multi
         <runtime-link>shared
 
+        <target-os>linux:<cxxflags>-Wl,-E
+
         <target-os>windows:<include>../OpenSSL/install/include/
         <target-os>windows:<include>../PostgreSQL/libpqxx/config/sample-headers/libpq/8.3
         <target-os>windows:<include>../PostgreSQL/libpqxx/config/sample-headers/compiler/VisualC++.NET-2003
