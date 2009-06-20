@@ -5,7 +5,8 @@ lib fost-pqxx
         ../../../PostgreSQL//libpq
         [ path.glob $(TOP)/../PostgreSQL/libpqxx/src/ : *.cxx ]
     :
-        <define>PQXX_HAVE_BOOST
+        <define>PQXX_HAVE_BOOST_SMART_PTR
+        <define>PQXXTR1=boost
 
         <target-os>linux:<include>/usr/include/postgresql
 
