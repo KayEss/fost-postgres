@@ -10,7 +10,6 @@ lib fost-postgres
         pqxx-driver.cpp
     :
         <define>PQXX_HAVE_BOOST
-        <include>../include
     ;
 
 install ../../../dist/lib

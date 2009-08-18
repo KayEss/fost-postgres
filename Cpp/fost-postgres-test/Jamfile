@@ -10,8 +10,6 @@ lib fost-postgres-test-smoke
         ../../../fost-base/Cpp/fost-test/
         ../../../fost-orm/Cpp/fost-schema/
         basic.cpp
-    :
-        <include>../include
     ;
 
 install ../../../dist/lib :
