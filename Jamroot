@@ -5,6 +5,7 @@ use-project fost-orm : ../fost-orm/ ;
 include ../fost-base/fost.jam ;
 fost-project fost-postgres
     :
+        <include>../fost-orm/Cpp/include
         <include>../PostgreSQL/libpqxx/include
 
         <target-os>windows:<include>../PostgreSQL/libpqxx/config/sample-headers/libpq/8.3
