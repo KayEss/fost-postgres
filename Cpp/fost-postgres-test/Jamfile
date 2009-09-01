@@ -24,6 +24,7 @@ run ../../../fost-base/Cpp/fost-ftest//ftest
 run ../../../fost-orm/Cpp/fost-schema-test//fost-schema-test-dyndriver
     :
         pqxx
+        -d "\"user=Test password=tester host=localhost dbname=postgres\""
     :
         ../fost-postgres//fost-postgres
     :
