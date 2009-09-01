@@ -42,3 +42,28 @@ FSL_TEST_FUNCTION( types ) {
     check_create_table( "types_null", false );
 }
 
+
+FSL_TEST_FUNCTION( foreign_key ) {
+    dbconnection dbc( read_dsn.value() + L" dbname=FSL_Test", write_dsn.value() + L" dbname=FSL_Test" );
+
+    meta_instance simple( L"fk_simple" ), ref1("fk_ref1");
+    /*
+        Create a simple object definition
+    */
+    simple
+        .primary_key(L"id", L"integer")
+        .field(L"name", L"varchar", true, 10)
+    ;
+    // Add a non-nullable reference to a simple object
+    ref1
+        .primary_key(L"id", L"integer")
+        .field(L"simple", simple, false)
+    ;
+    // Finally create the tables
+    dbtransaction transaction( dbc );
+    transaction
+        .create_table( simple )
+        .create_table( ref1 )
+        .commit();
+}
+
