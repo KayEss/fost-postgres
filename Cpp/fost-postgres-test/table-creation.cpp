@@ -28,14 +28,15 @@ namespace {
             .field( L"test_varchar", L"varchar", not_null, 128 )
             .field( L"test_text", L"text", not_null )
             .field( L"test_boolean", L"boolean", not_null )
+            .field( L"test_float", L"float", not_null )
+            .field( L"test_date", L"date", not_null )
+            .field( L"test_timestamp", L"timestamp", not_null )
         ;
         dbtransaction transaction( dbc );
         transaction.create_table( types );
         transaction.commit();
     }
 }
-
-
 FSL_TEST_FUNCTION( types ) {
     check_create_table( "types_not_null", true );
     check_create_table( "types_null", false );
