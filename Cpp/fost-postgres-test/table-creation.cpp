@@ -46,24 +46,37 @@ FSL_TEST_FUNCTION( types ) {
 FSL_TEST_FUNCTION( foreign_key ) {
     dbconnection dbc( read_dsn.value() + L" dbname=FSL_Test", write_dsn.value() + L" dbname=FSL_Test" );
 
-    meta_instance simple( L"fk_simple" ), ref1("fk_ref1");
     /*
-        Create a simple object definition
+        Create a simple object definition and a multi-key one
     */
+    meta_instance simple( L"fk_simple" ), multi_pk( "fk_multi" );
     simple
         .primary_key(L"id", L"integer")
         .field(L"name", L"varchar", true, 10)
     ;
+    multi_pk
+        .primary_key(L"id", L"integer")
+        .primary_key(L"name", L"varchar", 10)
+    ;
     // Add a non-nullable reference to a simple object
+    meta_instance ref1("fk_ref1");
     ref1
         .primary_key(L"id", L"integer")
         .field(L"simple", simple, false)
+    ;
+    // Add a non-nullable reference to a multi_pk object
+    meta_instance ref2("fk_ref2");
+    ref2
+        .primary_key(L"id", L"integer")
+        .field(L"multi", multi_pk, false)
     ;
     // Finally create the tables
     dbtransaction transaction( dbc );
     transaction
         .create_table( simple )
-        //.create_table( ref1 ) This one won't work yet because we have to re-structure the SQL generator
+        .create_table( multi_pk )
+        .create_table( ref1 )
+        .create_table( ref2 )
         .commit();
 }
 
