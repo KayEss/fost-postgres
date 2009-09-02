@@ -77,6 +77,18 @@ FSL_TEST_FUNCTION( foreign_key ) {
         .field(L"multi", multi_pk, false)
     ;
     FSL_CHECK_EQ( ref3[L"multi"].not_null(), false );
+    // Add a reference as a primary key
+    meta_instance ref4("fk_ref4");
+    ref4
+        .primary_key(L"id", simple)
+        .field(L"multi", multi_pk, false)
+    ;
+    // Add a join table poining to multi key tables
+    meta_instance ref5("fk_ref5");
+    ref5
+        .primary_key(L"simple", simple)
+        .primary_key(L"multi", multi_pk)
+    ;
     // Finally create the tables
     dbtransaction transaction( dbc );
     transaction
@@ -85,6 +97,8 @@ FSL_TEST_FUNCTION( foreign_key ) {
         .create_table( ref1 )
         .create_table( ref2 )
         .create_table( ref3 )
+        .create_table( ref4 )
+        .create_table( ref5 )
         .commit();
 }
 
