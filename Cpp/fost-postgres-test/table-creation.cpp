@@ -62,14 +62,21 @@ FSL_TEST_FUNCTION( foreign_key ) {
     meta_instance ref1("fk_ref1");
     ref1
         .primary_key(L"id", L"integer")
-        .field(L"simple", simple, false)
+        .field(L"simple", simple, true)
     ;
     // Add a non-nullable reference to a multi_pk object
     meta_instance ref2("fk_ref2");
     ref2
         .primary_key(L"id", L"integer")
+        .field(L"multi", multi_pk, true)
+    ;
+    // Add a nullable reference to a multi_pk object
+    meta_instance ref3("fk_ref3");
+    ref3
+        .primary_key(L"id", L"integer")
         .field(L"multi", multi_pk, false)
     ;
+    FSL_CHECK_EQ( ref3[L"multi"].not_null(), false );
     // Finally create the tables
     dbtransaction transaction( dbc );
     transaction
@@ -77,6 +84,7 @@ FSL_TEST_FUNCTION( foreign_key ) {
         .create_table( multi_pk )
         .create_table( ref1 )
         .create_table( ref2 )
+        .create_table( ref3 )
         .commit();
 }
 
