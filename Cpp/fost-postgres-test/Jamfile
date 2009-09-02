@@ -1,33 +1,33 @@
+using testing ;
 
-lib fost-postgres-test-smoke
+fost-lib fost-postgres-test
     :
         ../../../fost-base/External//uuid
-        ../../../Boost//boost-date_time-dll
-        ../../../Boost//boost-filesystem-dll
-        ../../../Boost//boost-system-dll
-        ../../../Boost//boost-thread-dll
-        ../../../fost-base/Cpp/fost-core/
         ../../../fost-base/Cpp/fost-test/
         ../../../fost-orm/Cpp/fost-schema/
         basic.cpp
-    :
-        <include>../include
+        config.cpp
+        table-creation.cpp
     ;
 
-install ../../../dist/lib :
-        fost-postgres-test-smoke
+run ../../../fost-base/Cpp/fost-ftest//ftest
     :
-        <target-os>linux:<install-dependencies>on
-        <target-os>linux:<install-type>LIB
-        <target-os>darwin:<install-dependencies>on
-        <target-os>darwin:<install-type>LIB
-        <target-os>windows:<install-type>XXX
+        -v true
+    :
+        ../fost-postgres//fost-postgres
+        fost-postgres-test
+    :
+    :
+        fost-postgres-test-run
     ;
 
-install ../../../dist/bin :
-        fost-postgres-test-smoke
+run ../../../fost-orm/Cpp/fost-schema-test//fost-schema-test-dyndriver
     :
-        <install-dependencies>on
-        <install-type>EXE
-        <target-os>windows:<install-type>LIB
+        pqxx
+        -d "\"user=Test password=tester host=localhost dbname=postgres\""
+    :
+        ../fost-postgres//fost-postgres
+    :
+    :
+        fost-postgres-driver-load
     ;
