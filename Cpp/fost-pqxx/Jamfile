@@ -22,3 +22,5 @@ lib fost-pqxx
         <target-os>windows:<define>PQXX_SHARED
         <target-os>windows:<define>PQXX_INTERNAL
     ;
+
+fost-install fost-pqxx ;
