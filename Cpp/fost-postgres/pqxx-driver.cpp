@@ -51,7 +51,7 @@ namespace {
         boost::scoped_ptr< pqxx::work > m_transaction;
 
         pqRead( fostlib::dbconnection &d )
-        : read( d ), m_pqcon( fostlib::coerce< fostlib::utf8string >( d.configuration()[ L"read" ].get< fostlib::string >().value() ).c_str() ) {
+        : read( d ), m_pqcon( fostlib::coerce< fostlib::utf8_string >( d.configuration()[ L"read" ].get< fostlib::string >().value() ).underlying().c_str() ) {
             transaction();
         }
         ~pqRead()
@@ -80,7 +80,7 @@ namespace {
     public:
         pqRecordset( const fostlib::dbconnection &dbc, const pqRead &reader, const fostlib::sql::statement &cmd )
         : fostlib::dbinterface::recordset( cmd ),
-            m_rs( reader.m_transaction->exec( fostlib::coerce< fostlib::utf8string >( cmd.underlying() ) ) ),
+            m_rs( reader.m_transaction->exec( fostlib::coerce< fostlib::utf8_string >( cmd.underlying() ).underlying() ) ),
             m_position( m_rs.begin() ),
             m_names( m_rs.columns() ) {
             for ( pqxx::result::tuple::size_type p( 0 ); p < m_rs.columns(); ++p )
@@ -124,7 +124,7 @@ namespace {
         }
 
         const fostlib::json &field( const fostlib::string &name ) const {
-            return field( m_rs.column_number( fostlib::coerce< fostlib::utf8string >( name ) ) );
+            return field( m_rs.column_number( fostlib::coerce< fostlib::utf8_string >( name ).underlying() ) );
         }
 
         fostlib::json to_json() const {
@@ -141,7 +141,11 @@ namespace {
         pqWrite( fostlib::dbconnection &dbc, pqRead &reader )
         : write( reader ), m_reader( reader ) {
             m_reader.m_transaction.reset();
-            m_pqcon.reset( new pqxx::connection( fostlib::coerce< fostlib::utf8string >( dbc.configuration()[ L"write" ].get< fostlib::string >().value() ) ) );
+            m_pqcon.reset( new pqxx::connection(
+                fostlib::coerce< fostlib::utf8_string >(
+                    dbc.configuration()[ L"write" ].get< fostlib::string >().value()
+                ).underlying()
+            ) );
             m_transaction.reset( new pqxx::work( *m_pqcon ) );
         }
 
@@ -152,7 +156,7 @@ namespace {
 
         void execute( const fostlib::sql::statement &cmd ) {
             try {
-                m_transaction->exec( fostlib::coerce< fostlib::utf8string >( cmd.underlying() ) );
+                m_transaction->exec( fostlib::coerce< fostlib::utf8_string >( cmd.underlying() ).underlying() );
             } catch ( std::exception &e ) {
                 throw fostlib::exceptions::transaction_fault( fostlib::string( e.what() ) );
             }
@@ -180,16 +184,20 @@ namespace {
 
 
 void pqInterface::create_database( fostlib::dbconnection &dbc, const fostlib::string &name ) const {
-    pqxx::connection con( fostlib::coerce< fostlib::utf8string >( dbc.configuration()[ L"write" ].get< fostlib::string >().value() ) );
+    pqxx::connection con(
+        fostlib::coerce< fostlib::utf8_string >( dbc.configuration()[ L"write" ].get< fostlib::string >().value() ).underlying()
+    );
     pqxx::nontransaction tran( con );
-    tran.exec( "CREATE DATABASE \"" + fostlib::coerce< fostlib::utf8string >( name ) + "\"" );
+    tran.exec( "CREATE DATABASE \"" + fostlib::coerce< fostlib::utf8_string >( name ).underlying() + "\"" );
 }
 
 
 void pqInterface::drop_database( fostlib::dbconnection &dbc, const fostlib::string &name ) const {
-    pqxx::connection con( fostlib::coerce< fostlib::utf8string >( dbc.configuration()[ L"write" ].get< fostlib::string >().value() ) );
+    pqxx::connection con( fostlib::coerce< fostlib::utf8_string >(
+        dbc.configuration()[ L"write" ].get< fostlib::string >().value()
+    ).underlying() );
     pqxx::nontransaction tran( con );
-    tran.exec( "DROP DATABASE \"" + fostlib::coerce< fostlib::utf8string >( name ) + "\"" );
+    tran.exec( "DROP DATABASE \"" + fostlib::coerce< fostlib::utf8_string >( name ).underlying() + "\"" );
 }
 
 int64_t pqInterface::next_id( fostlib::dbconnection &dbc, const fostlib::string &counter ) const {
