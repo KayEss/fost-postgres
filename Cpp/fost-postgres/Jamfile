@@ -3,10 +3,10 @@ lib fost-postgres
     :
         ../../../Boost//boost-date_time-dll
         ../../../Boost//boost-thread-dll
-        ../../../fost-base/Cpp/fost-core/
-        ../../../fost-orm/Cpp/fost-schema/
-        ../../../fost-orm//fost-sql
-        ../fost-pqxx/
+        ../../../fost-base/Cpp/fost-core
+        ../../../fost-orm/Cpp/fost-schema
+        ../../../fost-orm/Cpp/fost-sql
+        ../fost-pqxx
         pqxx-driver.cpp
     :
         <define>PQXX_HAVE_BOOST_SMART_PTR
