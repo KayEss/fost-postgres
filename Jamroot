@@ -13,8 +13,14 @@ fost-project fost-postgres
         <target-os>windows:<include>"C:/Program Files/PostgreSQL/8.3/include"
     ;
 
-build-project ../fost-base/Cpp/fost-ftest/ ;
-build-project ../fost-orm/Cpp/fost-schema-test//fost-schema-test-dyndriver ;
-build-project Cpp/fost-postgres/ ;
-build-project Cpp/fost-postgres-test/ ;
-build-project Cpp/fost-pqxx ;
+alias fost
+    :
+        Cpp/fost-postgres
+        Cpp/fost-pqxx
+    ;
+
+alias tests
+    :
+        Cpp/fost-postgres-test
+    ;
+explicit tests ;
