@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -76,13 +76,20 @@ namespace {
         pqxx::result m_rs;
         pqxx::result::const_iterator m_position;
         std::vector< fostlib::string > m_names;
-        mutable std::map< pqxx::result::tuple::size_type, fostlib::nullable< fostlib::json > > m_fields;
+        mutable std::map<
+            pqxx::result::tuple::size_type,
+            fostlib::nullable< fostlib::json >
+        > m_fields;
     public:
-        pqRecordset( const fostlib::dbconnection &dbc, const pqRead &reader, const fostlib::sql::statement &cmd )
-        : fostlib::dbinterface::recordset( cmd ),
-            m_rs( reader.m_transaction->exec( fostlib::coerce< fostlib::utf8_string >( cmd.underlying() ).underlying() ) ),
-            m_position( m_rs.begin() ),
-            m_names( m_rs.columns() ) {
+        pqRecordset(
+            const fostlib::dbconnection &dbc,
+            const pqRead &reader, const fostlib::sql::statement &cmd
+        ) : fostlib::dbinterface::recordset( cmd ),
+                m_rs( reader.m_transaction->exec(
+                    fostlib::coerce< fostlib::utf8_string >( cmd.underlying() ).underlying()
+                ) ),
+                m_position( m_rs.begin() ),
+                m_names( m_rs.columns() ) {
             for ( pqxx::result::tuple::size_type p( 0 ); p < m_rs.columns(); ++p )
                 m_names[ p ] = fostlib::string( m_rs.column_name( p ) );
         }
@@ -107,28 +114,41 @@ namespace {
         }
 
         const fostlib::json &field( std::size_t i ) const {
-            if ( i >= fields() )
-                throw fostlib::exceptions::out_of_range< std::size_t >( 0, fields(), i );
-            pqxx::result::tuple::size_type n = pqxx::result::tuple::size_type( i );
+            try {
+                if ( eof() )
+                    throw fostlib::exceptions::unexpected_eof( L"Recordset is at EOF" );
 
-            if ( eof() )
-                throw fostlib::exceptions::unexpected_eof( L"Recordset is at EOF" );
-
-            if ( m_fields[ n ].isnull() ) {
-                if ( m_position[ n ].is_null() )
-                    m_fields[ n ] = fostlib::json();
-                else
-                    m_fields[ n ] = fostlib::json( m_position[ n ].c_str() );
+                pqxx::result::tuple::size_type n( i );
+                if ( m_fields[ n ].isnull() ) {
+                    if ( m_position[ n ].is_null() )
+                        m_fields[ n ] = fostlib::json();
+                    else
+                        m_fields[ n ] = fostlib::json( m_position[ n ].c_str() );
+                }
+                return m_fields[ n ].value();
+            } catch ( pqxx::range_error &e ) {
+                throw fostlib::exceptions::out_of_range< std::size_t >(
+                    "Accessing a column number not in the recordset",
+                    0, m_fields.size(), i
+                );
             }
-            return m_fields[ n ].value();
         }
 
         const fostlib::json &field( const fostlib::string &name ) const {
-            return field( m_rs.column_number( fostlib::coerce< fostlib::utf8_string >( name ).underlying() ) );
+            try {
+                return field( m_rs.column_number(
+                    fostlib::coerce< fostlib::utf8_string >( name ).underlying()
+                ) );
+            } catch ( fostlib::exceptions::exception &e ) {
+                e.info() << L"Whilst fetching column named: " << name << std::endl;
+                throw;
+            }
         }
 
         fostlib::json to_json() const {
-            throw fostlib::exceptions::not_implemented( L"json pqRecordset::to_json() const" );
+            throw fostlib::exceptions::not_implemented(
+                L"json pqRecordset::to_json() const"
+            );
         }
     };
 
@@ -156,7 +176,11 @@ namespace {
 
         void execute( const fostlib::sql::statement &cmd ) {
             try {
-                m_transaction->exec( fostlib::coerce< fostlib::utf8_string >( cmd.underlying() ).underlying() );
+                m_transaction->exec(
+                    fostlib::coerce< fostlib::utf8_string >(
+                        cmd.underlying()
+                    ).underlying()
+                );
             } catch ( std::exception &e ) {
                 throw fostlib::exceptions::transaction_fault( fostlib::string( e.what() ) );
             }
