@@ -46,9 +46,10 @@ FSL_TEST_FUNCTION( normal_statements ) {
     recordset rs2( dbc.query( sql::statement( L"SELECT 1234 AS c0" ) ) );
     FSL_CHECK( !rs2.eof() );
     FSL_CHECK_EQ( coerce< int >( rs2.field( 0 ) ), 1234 );
-    /*FSL_CHECK_EXCEPTION(
-        coerce< int >( rs2.field( 1 ) ), fostlib::exceptions::not_implemented&
-    );*/
+    FSL_CHECK_EXCEPTION(
+        coerce< int >( rs2.field( 1 ) ),
+        fostlib::exceptions::out_of_range<std::size_t>&
+    );
     FSL_CHECK_EQ( coerce< int >( rs2.field( L"c0" ) ), 1234 );
     FSL_CHECK_EQ( rs2.name( 0 ), L"c0" );
 

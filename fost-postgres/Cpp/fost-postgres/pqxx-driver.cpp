@@ -120,7 +120,7 @@ namespace {
 
                 pqxx::result::tuple::size_type n( i );
                 if ( m_fields[ n ].isnull() ) {
-                    if ( m_position[ n ].is_null() )
+                    if ( m_position.at( n ).is_null() )
                         m_fields[ n ] = fostlib::json();
                     else
                         m_fields[ n ] = fostlib::json( m_position[ n ].c_str() );
