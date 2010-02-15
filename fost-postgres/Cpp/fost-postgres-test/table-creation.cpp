@@ -1,5 +1,5 @@
 /*
-    Copyright 2009, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2009-2010, Felspar Co Ltd. http://fost.3.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -76,7 +76,7 @@ FSL_TEST_FUNCTION( foreign_key ) {
         .primary_key(L"id", L"integer")
         .field(L"multi", multi_pk, false)
     ;
-    FSL_CHECK_EQ( ref3[L"multi"].not_null(), false );
+    FSL_CHECK_EQ( ref3[L"multi"].required(), false );
     // Add a reference as a primary key
     meta_instance ref4("fk_ref4");
     ref4

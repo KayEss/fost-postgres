@@ -3,8 +3,8 @@ include $(TOP)/../boost-version.jam ;
 
 use-project fost-orm : ../fost-orm/ ;
 include ../fost-base/fost.jam ;
-fost-project fost-postgres
-    :
+
+fost-project fost-postgres :
         <include>../fost-orm/Cpp/include
         <include>../PostgreSQL/libpqxx/include
 
@@ -13,14 +13,16 @@ fost-project fost-postgres
         <target-os>windows:<include>"C:/Program Files/PostgreSQL/8.3/include"
     ;
 
-alias fost
-    :
+
+alias fost :
+        ../fost-orm//fost
         Cpp/fost-postgres
         Cpp/fost-pqxx
     ;
 
-alias tests
-    :
+alias tests :
+        ../fost-base//tests
+        ../fost-orm//tests
         Cpp/fost-postgres-test
     ;
 explicit tests ;
