@@ -1,7 +1,20 @@
 #!/bin/bash
 cd `dirname $0`
 
-if ../bjam -j`grep -c ^processor /proc/cpuinfo` `../python.opts.sh` toolset=gcc $*
+if test -e /proc/
+then {
+    export CPUCOUNT=`grep -c ^processor /proc/cpuinfo`
+    export TOOLSET=gcc
+}
+else {
+    export CPUCOUNT=`sysctl -n hw.ncpu`
+    export TOOLSET=darwin
+    export DYLD_LIBRARY_PATH=../dist/lib
+    export LANG=C
+}
+fi
+
+if ../bjam -j$CPUCOUNT toolset=$TOOLSET `../python.opts.sh` $*
 then {
     echo fost-postgres $* OK
     exit 0
