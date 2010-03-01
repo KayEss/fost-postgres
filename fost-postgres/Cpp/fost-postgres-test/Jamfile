@@ -21,13 +21,3 @@ run ../../../fost-base/Cpp/fost-ftest//ftest
         fost-postgres-test-run
     ;
 
-run ../../../fost-orm/Cpp/fost-schema-test//fost-schema-test-dyndriver
-    :
-        pqxx
-        -d "\"user=Test password=tester host=localhost dbname=postgres\""
-    :
-        ../fost-postgres//fost-postgres
-    :
-    :
-        fost-postgres-driver-load
-    ;
