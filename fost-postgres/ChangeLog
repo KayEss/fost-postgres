@@ -1,3 +1,7 @@
+2010-06-19  Kirit Saelensminde  <kirit@felspar.com>
+ Mac builds
+ - Added support for Postgres installation into /usr/local/pgsql/
+
 2010-03-22  Kirit Saelensminde  <kirit@felspar.com>
  ChangeLog
  - Added ChangeLog

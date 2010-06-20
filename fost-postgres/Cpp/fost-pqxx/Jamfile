@@ -8,6 +8,8 @@ lib fost-pqxx
         <define>PQXX_HAVE_BOOST_SMART_PTR
         <define>PQXXTR1=boost
 
+        <target-os>darwin:<include>/usr/local/pgsql/include/
+
         <target-os>linux:<include>/usr/include/postgresql
 
         <target-os>windows:<source>../../../fost-base/External//winsock
