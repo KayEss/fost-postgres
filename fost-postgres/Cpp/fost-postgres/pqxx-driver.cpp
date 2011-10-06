@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2010, Felspar Co Ltd. http://fost.3.felspar.com/
+    Copyright 2008-2011, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -11,8 +11,9 @@
 #include <fost/exception/unexpected_eof.hpp>
 
 #include <pqxx/connection>
-#include <pqxx/transaction>
 #include <pqxx/nontransaction>
+#include <pqxx/transaction>
+#include <pqxx/tuple>
 
 
 namespace {
@@ -77,7 +78,7 @@ namespace {
         pqxx::result::const_iterator m_position;
         std::vector< fostlib::string > m_names;
         mutable std::map<
-            pqxx::result::tuple::size_type,
+            pqxx::tuple::size_type,
             fostlib::nullable< fostlib::json >
         > m_fields;
     public:
@@ -90,7 +91,7 @@ namespace {
                 ) ),
                 m_position( m_rs.begin() ),
                 m_names( m_rs.columns() ) {
-            for ( pqxx::result::tuple::size_type p( 0 ); p < m_rs.columns(); ++p )
+            for ( pqxx::tuple::size_type p( 0 ); p < m_rs.columns(); ++p )
                 m_names[ p ] = fostlib::string( m_rs.column_name( p ) );
         }
 
@@ -118,7 +119,7 @@ namespace {
                 if ( eof() )
                     throw fostlib::exceptions::unexpected_eof( L"Recordset is at EOF" );
 
-                pqxx::result::tuple::size_type n( i );
+                pqxx::tuple::size_type n( i );
                 if ( m_fields[ n ].isnull() ) {
                     if ( m_position.at( n ).is_null() )
                         m_fields[ n ] = fostlib::json();

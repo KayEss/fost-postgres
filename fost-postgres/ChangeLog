@@ -1,3 +1,6 @@
+2011-10-06  Kirit Saelensminde  <kirit@felspar.com>
+ Updated the driver to use the refactored libpqxx interface.
+
 2010-06-19  Kirit Saelensminde  <kirit@felspar.com>
  Mac builds
  - Added support for Postgres installation into /usr/local/pgsql/
