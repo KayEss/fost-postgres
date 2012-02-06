@@ -9,6 +9,7 @@ lib fost-pqxx
         <define>PQXXTR1=boost
 
         <target-os>darwin:<include>/usr/local/pgsql/include/
+        <target-os>darwin:<include>/Library/PostgreSQL/9.1/include/
 
         <target-os>linux:<include>/usr/include/postgresql
 
