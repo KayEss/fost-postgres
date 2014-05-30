@@ -6,7 +6,7 @@ lib fost-postgres
         ../../../fost-base/Cpp/fost-core
         ../../../fost-orm/Cpp/fost-schema
         ../../../fost-orm/Cpp/fost-sql
-        ../fost-pqxx
+        ../fost-pqxx//fost-pqxx
         pqxx-driver.cpp
     :
         <define>PQXX_HAVE_BOOST_SMART_PTR

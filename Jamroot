@@ -16,6 +16,7 @@ fost-project fost-postgres :
         <target-os>windows:<include>../PostgreSQL/libpqxx/config/sample-headers/libpq/8.3
         <target-os>windows:<include>../PostgreSQL/libpqxx/config/sample-headers/compiler/VisualC++.NET-2003
         <target-os>windows:<include>"C:/Program Files/PostgreSQL/8.3/include"
+        <target-os>windows:<include>"C:/Program Files/PostgreSQL/9.3/include"
     ;
 
 
