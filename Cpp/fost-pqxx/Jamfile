@@ -1,3 +1,4 @@
+include $(TOP)/../fost-base/fost.jam ;
 import path ;
 
 
@@ -57,6 +58,7 @@ lib fost-pqxx
 
         <target-os>linux:<include>/usr/include/postgresql
 
+        $(TARGET_REQUIREMENTS)
         $(REQUIREMENTS)
 
         <target-os>windows:<define>_CRT_SECURE_NO_WARNINGS

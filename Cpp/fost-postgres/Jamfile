@@ -1,3 +1,4 @@
+include $(TOP)/../fost-base/fost.jam ;
 
 lib fost-postgres
     :
@@ -9,6 +10,7 @@ lib fost-postgres
         ../fost-pqxx//fost-pqxx
         pqxx-driver.cpp
     :
+        $(TARGET_REQUIREMENTS)
         <define>PQXX_HAVE_BOOST_SMART_PTR
         <define>PQXXTR1=boost
     ;
