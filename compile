@@ -1,22 +1,24 @@
 #!/bin/bash
 cd `dirname $0`
 
+export VARIANTS=$*
+
 if test -e /proc/
 then {
     export CPUCOUNT=`grep -c ^processor /proc/cpuinfo`
-    export TOOLSET=gcc
-}
-else {
+    export TOOLSET=''
+    export LD_LIBRARY_PATH=../dist/lib
+} else {
     export CPUCOUNT=`sysctl -n hw.ncpu`
-    export TOOLSET=darwin
+    export TOOLSET=toolset=darwin
     export DYLD_LIBRARY_PATH=../dist/lib
     export LANG=C
 }
 fi
 
-if ../bjam -j$CPUCOUNT toolset=$TOOLSET `../python.opts.sh` $*
+if ../bjam -j$CPUCOUNT $TOOLSET $VARIANTS
 then {
-    echo fost-postgres $* OK
+    echo fost-postgres $VARIANTS OK
     exit 0
 } else {
     exit 1
