@@ -58,7 +58,8 @@ lib fost-pqxx
 
         <target-os>linux:<include>/usr/include/postgresql
 
-        $(TARGET_REQUIREMENTS)
+        <toolset>clang:<cxxflags>-std=c++14
+        <toolset>gcc:<cxxflags>-std=c++14
         $(REQUIREMENTS)
 
         <target-os>windows:<define>_CRT_SECURE_NO_WARNINGS
