@@ -2,11 +2,6 @@ include $(TOP)/../fost-base/fost.jam ;
 import path ;
 
 
-REQUIREMENTS =
-        -<threading>multi # Works around a bug in boost.build
-    ;
-
-
 rule pgdll ( libs * )
 {
     lib $(libs) ;
