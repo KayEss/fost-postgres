@@ -1,9 +1,5 @@
+include $(TOP)/../fost-base/fost.jam ;
 import path ;
-
-
-REQUIREMENTS =
-        -<threading>multi # Works around a bug in boost.build
-    ;
 
 
 rule pgdll ( libs * )
@@ -57,6 +53,8 @@ lib fost-pqxx
 
         <target-os>linux:<include>/usr/include/postgresql
 
+        <toolset>clang:<cxxflags>-std=c++14
+        <toolset>gcc:<cxxflags>-std=c++14
         $(REQUIREMENTS)
 
         <target-os>windows:<define>_CRT_SECURE_NO_WARNINGS
