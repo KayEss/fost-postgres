@@ -7,7 +7,8 @@ lib fost-postgres
         ../../../fost-base/Cpp/fost-core
         ../../../fost-orm/Cpp/fost-schema
         ../../../fost-orm/Cpp/fost-sql
-        ../fost-pqxx//fost-pqxx
+        ../fost-pqxx
+        connection.cpp
         pqxx-driver.cpp
     :
         $(TARGET_REQUIREMENTS)

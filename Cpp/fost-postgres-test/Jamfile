@@ -8,6 +8,7 @@ fost-lib fost-postgres-test
         basic.cpp
         config.cpp
         table-creation.cpp
+        pg.cpp
     ;
 
 run ../../../fost-base/Cpp/fost-ftest//ftest
