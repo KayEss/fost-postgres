@@ -2,43 +2,8 @@ include $(TOP)/../fost-base/fost.jam ;
 import path ;
 
 
-rule pgdll ( libs * )
-{
-    lib $(libs) ;
-
-    local prefix83 = "C:\\Program Files\\PostgreSQL\\8.3\\bin\\" ;
-    local suffix = ".dll" ;
-
-    for local curlib in $(libs)
-    {
-        local name = $(prefix83) $(curlib) $(suffix) ;
-        lib $(curlib) : : <file>$(name:J) <target-os>windows ;
-    }
-
-    install ../dist/bin : libpq-dll $(libs) ;
-}
-
-
-lib libpq-dll ;
 lib libpq : : <name>pq ;
 
- if [ path.exists "C:/Program Files/PostgreSQL/9.3" ] {
-    lib libpq-dll : : <file>"C:/Program Files/PostgreSQL/9.3/bin/libpq.dll" <target-os>windows ;
-    lib libpq : libpq-dll : <file>"C:/Program Files/PostgreSQL/9.3/lib/libpq.lib"  <target-os>windows ;
-} else if [ path.exists "C:/Program Files/PostgreSQL/8.3" ] {
-    pgdll comerr32 gssapi32 k5sprt32 krb5_32 libiconv2 libintl3 ;
-    lib libpq-dll : : <file>"C:/Program Files/PostgreSQL/8.3/bin/libpq.dll" <target-os>windows ;
-    lib libpq : libpq-dll : <file>"C:/Program Files/PostgreSQL/8.3/lib/libpq.lib" <target-os>windows ;
-    REQUIREMENTS = $(REQUIREMENTS)
-            <target-os>windows:<source>../../../fost-base/External//winsock
-            <target-os>windows:<source>comerr32
-            <target-os>windows:<source>gssapi32
-            <target-os>windows:<source>k5sprt32
-            <target-os>windows:<source>krb5_32
-            <target-os>windows:<source>libiconv2
-            <target-os>windows:<source>libintl3
-        ;
-}
 
 lib fost-pqxx
     :
