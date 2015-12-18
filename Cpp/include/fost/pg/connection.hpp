@@ -20,6 +20,8 @@ namespace fostlib {
             struct impl;
             std::unique_ptr<impl> pimpl;
         public:
+            /// A default connection without host or password
+            connection();
             /// Connect to a specified host without specifying a password
             connection(const string &);
             /// Destructor so we can link

@@ -13,6 +13,8 @@ struct fostlib::pg::connection::impl {
 };
 
 
+fostlib::pg::connection::connection() {
+}
 fostlib::pg::connection::connection(const string &host) {
 }
 

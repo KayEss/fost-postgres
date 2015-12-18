@@ -8,6 +8,7 @@
 
 #include "fost-postgres-test.hpp"
 #include <fost/postgres>
+#include <fost/test>
 
 
 using namespace fostlib;
@@ -16,7 +17,12 @@ using namespace fostlib;
 FSL_TEST_SUITE(pg);
 
 
-FSL_TEST_FUNCTION(connect) {
-    fostlib::pg::connection cnx("");
+FSL_TEST_FUNCTION(connect_default) {
+    fostlib::pg::connection cnx;
+}
+
+
+FSL_TEST_FUNCTION(connect_specified) {
+    fostlib::pg::connection cnx2("/var/run/postgres");
 }
 
