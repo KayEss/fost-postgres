@@ -6,7 +6,11 @@
 */
 
 
+#pragma once
+
+
 #include <fost/core>
+#include <fost/pg/recordset-range.hpp>
 
 
 namespace fostlib {
@@ -26,6 +30,9 @@ namespace fostlib {
             connection(const string &);
             /// Destructor so we can link
             ~connection();
+
+            /// Return a recordset range from the execution of the command
+            recordset_range exec(const utf8_string &);
         };
 
 

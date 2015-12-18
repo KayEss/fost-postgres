@@ -10,6 +10,7 @@ lib fost-postgres
         ../fost-pqxx
         connection.cpp
         pqxx-driver.cpp
+        recordset-range.cpp
     :
         $(TARGET_REQUIREMENTS)
         <define>PQXX_HAVE_BOOST_SMART_PTR

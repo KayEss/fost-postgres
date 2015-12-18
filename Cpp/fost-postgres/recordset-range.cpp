@@ -6,8 +6,10 @@
 */
 
 
-#pragma once
+#include <fost/pg/recordset-range.hpp>
 
 
-#include <fost/pg/connection.hpp>
+fostlib::pg::recordset_range::recordset_range() {
+}
+
 
