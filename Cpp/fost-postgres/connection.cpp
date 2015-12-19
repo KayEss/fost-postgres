@@ -23,6 +23,6 @@ fostlib::pg::connection::~connection() = default;
 
 
 fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
-    return recordset(*pimpl, sql);
+    return std::move(recordset(*pimpl, sql));
 }
 

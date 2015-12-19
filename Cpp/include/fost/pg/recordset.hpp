@@ -22,10 +22,17 @@ namespace fostlib {
         /// A range-based recordset
         class recordset {
             friend class connection;
+            struct impl;
+            std::unique_ptr<impl> pimpl;
         private:
             recordset(connection::impl &, const utf8_string &);
 
         public:
+            /// Allow move
+            recordset(recordset&&);
+            /// Allow public desctruction
+            ~recordset();
+
             /// A single row from a recordset
             using record_type = const std::vector<json>;
 

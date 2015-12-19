@@ -7,6 +7,7 @@
 
 
 #include <fost/pg/recordset.hpp>
+#include "recordset.hpp"
 
 
 /*
@@ -14,7 +15,15 @@
 */
 
 
-fostlib::pg::recordset::recordset(connection::impl &cnx, const utf8_string &sql) {
+fostlib::pg::recordset::recordset(connection::impl &cnx, const utf8_string &sql)
+: pimpl(new impl(cnx, sql)) {
+}
+fostlib::pg::recordset::recordset(recordset &&other)
+: pimpl(std::move(other.pimpl)) {
+}
+
+
+fostlib::pg::recordset::~recordset() {
 }
 
 
