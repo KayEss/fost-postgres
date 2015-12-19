@@ -19,16 +19,7 @@ namespace fostlib {
     namespace pg {
 
 
-        class recordset;
-
-
-        /// A single row in the results
-        class record {
-            std::vector<json> fields;
-            record(std::vector<json>);
-
-            friend class recordset;
-        };
+        class record;
 
 
         /// A range-based recordset
@@ -69,6 +60,21 @@ namespace fostlib {
 
             friend class const_iterator;
             friend class connection;
+        };
+
+
+        /// A single row in the results
+        class record {
+            std::vector<json> fields;
+            record(std::size_t);
+
+        public:
+            /// The number of columns
+            std::size_t size() const {
+                return fields.size();
+            }
+
+            friend class recordset::const_iterator;
         };
 
 

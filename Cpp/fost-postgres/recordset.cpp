@@ -15,6 +15,10 @@
 */
 
 
+fostlib::pg::record::record(std::size_t columns)
+: fields(columns) {
+}
+
 
 /*
     fostlib::pg::recordset
@@ -44,13 +48,13 @@ fostlib::pg::recordset::const_iterator fostlib::pg::recordset::begin() const {
 
 
 fostlib::pg::recordset::const_iterator::const_iterator()
-: pimpl(new impl(pqxx::result::const_iterator())) {
+: pimpl(new impl(pqxx::result::const_iterator(), 0u)) {
 }
 fostlib::pg::recordset::const_iterator::const_iterator(const const_iterator &other)
-: pimpl(new impl(other.pimpl->position)) {
+: pimpl(new impl(other.pimpl->position, other.pimpl->row.size())) {
 }
 fostlib::pg::recordset::const_iterator::const_iterator(recordset::impl &rs, bool begin)
-: pimpl(new impl(begin ? rs.records.begin() : rs.records.end())) {
+: pimpl(new impl(begin ? rs.records.begin() : rs.records.end(), rs.records.columns())) {
 }
 
 
@@ -58,6 +62,6 @@ fostlib::pg::recordset::const_iterator::~const_iterator() = default;
 
 
 fostlib::pg::record *fostlib::pg::recordset::const_iterator::operator -> () const {
-    throw fostlib::exceptions::not_implemented(__FUNCTION__);
+    return &pimpl->row;
 }
 
