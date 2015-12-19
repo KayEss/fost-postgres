@@ -48,7 +48,10 @@ namespace fostlib {
                 /// Allow destruction
                 ~const_iterator();
 
-                record *operator -> () const;
+                /// Dereference the iterator
+                const record *operator -> () const;
+                /// Dereference the iterator
+                const record &operator * () const;
 
                 friend class recordset;
             };
@@ -72,6 +75,11 @@ namespace fostlib {
             /// The number of columns
             std::size_t size() const {
                 return fields.size();
+            }
+
+            /// Return the value in the specified field number
+            const json &operator [] (std::size_t index) const {
+                return fields[index];
             }
 
             friend class recordset::const_iterator;
