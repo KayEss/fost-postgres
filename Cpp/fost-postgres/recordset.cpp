@@ -110,11 +110,12 @@ fostlib::pg::recordset::const_iterator::const_iterator()
 : pimpl(new impl(pqxx::result::const_iterator(), 0u)) {
 }
 fostlib::pg::recordset::const_iterator::const_iterator(const const_iterator &other)
-: pimpl(new impl(other.pimpl->position, other.pimpl->row.size())) {
+: pimpl(new impl(other.pimpl->rs, other.pimpl->position, other.pimpl->row.size())) {
     pimpl->row = other.pimpl->row;
 }
 fostlib::pg::recordset::const_iterator::const_iterator(recordset::impl &rs, bool begin)
-: pimpl(new impl(begin ? rs.records.begin() : rs.records.end(), rs.records.columns())) {
+: pimpl(new impl(&rs, begin ? rs.records.begin() : rs.records.end(), rs.records.columns()))
+{
     if ( pimpl->position != rs.records.end() ) {
         fillin(rs.types, pimpl->position, pimpl->row.fields);
     }
@@ -142,7 +143,9 @@ const fostlib::pg::record &fostlib::pg::recordset::const_iterator::operator * ()
 
 
 fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::operator ++ () {
-    ++pimpl->position;
+    if ( ++pimpl->position != pimpl->rs->records.end() ) {
+        fillin(pimpl->rs->types, pimpl->position, pimpl->row.fields);
+    }
     return *this;
 }
 

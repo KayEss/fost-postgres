@@ -84,3 +84,17 @@ FSL_TEST_FUNCTION(type_jsonb) {
     check("SELECT '{}'::jsonb", fostlib::json::object_t());
 }
 
+
+FSL_TEST_FUNCTION(rows) {
+    fostlib::pg::connection cnx;
+    auto records = cnx.exec("SELECT 1 UNION SELECT 2 UNION SELECT 3");
+    auto record = records.begin();
+    FSL_CHECK_EQ(record->size(), 1u);
+    FSL_CHECK_EQ((*record)[0], fostlib::json(1));
+    ++record;
+    FSL_CHECK_EQ((*record)[0], fostlib::json(2));
+    ++record;
+    FSL_CHECK_EQ((*record)[0], fostlib::json(3));
+    FSL_CHECK(++record == records.end());
+}
+

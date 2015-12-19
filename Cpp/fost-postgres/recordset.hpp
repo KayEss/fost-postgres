@@ -27,11 +27,15 @@ struct fostlib::pg::recordset::impl {
 
 
 struct fostlib::pg::recordset::const_iterator::impl {
+    fostlib::pg::recordset::impl *rs;
     pqxx::result::const_iterator position;
     record row;
 
     impl(pqxx::result::const_iterator pos, std::size_t cols)
-    : position(pos), row(cols) {
+    : rs(nullptr), position(pos), row(cols) {
+    }
+    impl(fostlib::pg::recordset::impl *rs, pqxx::result::const_iterator pos, std::size_t cols)
+    : rs(rs), position(pos), row(cols) {
     }
 };
 
