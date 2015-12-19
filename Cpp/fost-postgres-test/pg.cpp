@@ -20,11 +20,15 @@ FSL_TEST_SUITE(pg);
 FSL_TEST_FUNCTION(connect_default) {
     fostlib::pg::connection cnx;
     auto records = cnx.exec("SELECT 1");
+    auto record = records.begin();
+//     FSL_CHECK_EQ(record->size(), 1u);
 }
 
 
 FSL_TEST_FUNCTION(connect_specified) {
     fostlib::pg::connection cnx("/var/run/postgresql");
     auto records = cnx.exec("SELECT 1");
+    auto record = records.begin();
+//     FSL_CHECK_EQ(record->size(), 1u);
 }
 

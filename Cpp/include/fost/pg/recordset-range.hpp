@@ -26,6 +26,23 @@ namespace fostlib {
             friend class connection;
         private:
             recordset_range();
+
+        public:
+            /// A single row from a recordset
+            using record_type = const std::vector<json>;
+
+            /// The recordset iterator
+            class const_iterator {
+                record_type row;
+            public:
+
+                record_type *operator -> () const;
+            };
+
+            /// The first record
+            const_iterator begin() const;
+            /// The end of the recordset
+            const_iterator end() const;
         };
 
 

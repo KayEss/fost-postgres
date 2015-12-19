@@ -9,7 +9,26 @@
 #include <fost/pg/recordset-range.hpp>
 
 
+/*
+    fostlib::pg::recordset_range
+*/
+
+
 fostlib::pg::recordset_range::recordset_range() {
 }
 
+
+fostlib::pg::recordset_range::const_iterator fostlib::pg::recordset_range::begin() const {
+    return fostlib::pg::recordset_range::const_iterator();
+}
+
+
+/*
+    fostlib::pg::recordset_range::const_iterator
+*/
+
+
+fostlib::pg::recordset_range::record_type *fostlib::pg::recordset_range::const_iterator::operator -> () const {
+    return &row;
+}
 
