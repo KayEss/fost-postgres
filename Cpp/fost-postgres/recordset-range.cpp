@@ -14,7 +14,7 @@
 */
 
 
-fostlib::pg::recordset_range::recordset_range() {
+fostlib::pg::recordset_range::recordset_range(connection::impl &cnx, const utf8_string &sql) {
 }
 
 

@@ -10,5 +10,17 @@
 
 
 #include <fost/pg/connection.hpp>
-#include <fost/pg/recordset-range.hpp>
+#include <pqxx/connection>
+#include <pqxx/transaction>
+
+
+struct fostlib::pg::connection::impl {
+    pqxx::connection pqcnx;
+    pqxx::transaction<> trans;
+
+    impl(const fostlib::utf8_string &dsn)
+    : pqcnx(dsn.underlying()), trans(pqcnx) {
+    }
+};
+
 

@@ -10,6 +10,7 @@
 
 
 #include <fost/core>
+#include <fost/pg/connection.hpp>
 
 
 namespace fostlib {
@@ -18,14 +19,11 @@ namespace fostlib {
     namespace pg {
 
 
-        class connection;
-
-
         /// A range-based recordset
         class recordset_range {
             friend class connection;
         private:
-            recordset_range();
+            recordset_range(connection::impl &, const utf8_string &);
 
         public:
             /// A single row from a recordset

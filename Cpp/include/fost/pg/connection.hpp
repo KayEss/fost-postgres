@@ -10,7 +10,6 @@
 
 
 #include <fost/core>
-#include <fost/pg/recordset-range.hpp>
 
 
 namespace fostlib {
@@ -19,8 +18,12 @@ namespace fostlib {
     namespace pg {
 
 
+        class recordset_range;
+
+
         /// A read/write database connection
         class connection {
+            friend class recordset_range;
             struct impl;
             std::unique_ptr<impl> pimpl;
         public:
