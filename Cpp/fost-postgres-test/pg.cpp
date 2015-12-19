@@ -49,6 +49,9 @@ namespace {
         FSL_CHECK(++records.begin() == records.end());
     }
 }
+FSL_TEST_FUNCTION(type_null) {
+    check("SELECT NULL", fostlib::json());
+}
 FSL_TEST_FUNCTION(type_bool) {
     check("SELECT 't'::bool", true);
     check("SELECT 'f'::bool", false);
