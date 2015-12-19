@@ -15,9 +15,13 @@
 
 struct fostlib::pg::recordset::impl {
     pqxx::result records;
+    std::vector<pqxx::oid> types;
 
     impl(connection::impl &cnx, const utf8_string &sql)
-    : records(cnx.trans.exec(sql.underlying())) {
+    : records(cnx.trans.exec(sql.underlying())), types(records.columns()) {
+        for ( pqxx::row::size_type index{0}; index != types.size(); ++index ) {
+            types[index] = records.column_type(index);
+        }
     }
 };
 

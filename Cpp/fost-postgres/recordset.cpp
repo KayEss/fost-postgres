@@ -6,6 +6,14 @@
 */
 
 
+#include <postgres.h>
+#include <postgresql/libpq-fe.h>
+#include <catalog/pg_type.h>
+
+#include <fost/core>
+#include <fost/exception/parse_error.hpp>
+#include <fost/log>
+#include <fost/parse/parse.hpp>
 #include <fost/pg/recordset.hpp>
 #include "recordset.hpp"
 
@@ -51,12 +59,37 @@ fostlib::pg::recordset::const_iterator fostlib::pg::recordset::end() const {
 
 
 namespace {
-    void fillin(pqxx::result::const_iterator pos, std::vector<fostlib::json> &fields) {
+    int64_t int_parser(const char *value) {
+        int64_t ret{0};
+        if ( !boost::spirit::parse(value,
+                boost::spirit::int_parser<int64_t>()[phoenix::var(ret) = phoenix::arg1]).full )
+            throw fostlib::exceptions::parse_error("Whilst parsing an int", value);
+        return ret;
+    }
+
+    void fillin(
+        const std::vector<pqxx::oid> &types,
+        pqxx::result::const_iterator pos,
+        std::vector<fostlib::json> &fields
+    ) {
         for ( pqxx::row::size_type index{0}; index != fields.size(); ++index ) {
             if ( pos[index].is_null() ) {
                 fields[index] = fostlib::json();
             } else {
-                fields[index] = fostlib::json(pos[index].c_str());
+                fostlib::log::debug()
+                    ("index", index)
+                    ("oid", types[index])
+                    ("INT4OID", INT4OID);
+                switch ( types[index] ) {
+                case INT2OID:
+                case INT4OID:
+                case INT8OID:
+                    fields[index] = fostlib::json(int_parser(pos[index].c_str()));
+                    break;
+                default:
+                    fields[index] = fostlib::coerce<fostlib::json>(
+                        fostlib::utf8_string(pos[index].c_str()));
+                }
             }
         }
     }
@@ -73,7 +106,7 @@ fostlib::pg::recordset::const_iterator::const_iterator(const const_iterator &oth
 fostlib::pg::recordset::const_iterator::const_iterator(recordset::impl &rs, bool begin)
 : pimpl(new impl(begin ? rs.records.begin() : rs.records.end(), rs.records.columns())) {
     if ( pimpl->position != rs.records.end() ) {
-        fillin(pimpl->position, pimpl->row.fields);
+        fillin(rs.types, pimpl->position, pimpl->row.fields);
     }
 }
 
