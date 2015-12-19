@@ -22,7 +22,7 @@ fostlib::pg::connection::connection(const string &host)
 fostlib::pg::connection::~connection() = default;
 
 
-fostlib::pg::recordset_range fostlib::pg::connection::exec(const utf8_string &sql) {
-    return recordset_range(*pimpl, sql);
+fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
+    return recordset(*pimpl, sql);
 }
 

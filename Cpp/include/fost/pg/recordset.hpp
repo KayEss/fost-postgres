@@ -20,10 +20,10 @@ namespace fostlib {
 
 
         /// A range-based recordset
-        class recordset_range {
+        class recordset {
             friend class connection;
         private:
-            recordset_range(connection::impl &, const utf8_string &);
+            recordset(connection::impl &, const utf8_string &);
 
         public:
             /// A single row from a recordset

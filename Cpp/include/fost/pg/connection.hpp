@@ -18,12 +18,12 @@ namespace fostlib {
     namespace pg {
 
 
-        class recordset_range;
+        class recordset;
 
 
         /// A read/write database connection
         class connection {
-            friend class recordset_range;
+            friend class recordset;
             struct impl;
             std::unique_ptr<impl> pimpl;
         public:
@@ -35,7 +35,7 @@ namespace fostlib {
             ~connection();
 
             /// Return a recordset range from the execution of the command
-            recordset_range exec(const utf8_string &);
+            recordset exec(const utf8_string &);
         };
 
 

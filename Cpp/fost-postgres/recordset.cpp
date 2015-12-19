@@ -10,25 +10,25 @@
 
 
 /*
-    fostlib::pg::recordset_range
+    fostlib::pg::recordset
 */
 
 
-fostlib::pg::recordset_range::recordset_range(connection::impl &cnx, const utf8_string &sql) {
+fostlib::pg::recordset::recordset(connection::impl &cnx, const utf8_string &sql) {
 }
 
 
-fostlib::pg::recordset_range::const_iterator fostlib::pg::recordset_range::begin() const {
-    return fostlib::pg::recordset_range::const_iterator();
+fostlib::pg::recordset::const_iterator fostlib::pg::recordset::begin() const {
+    return fostlib::pg::recordset::const_iterator();
 }
 
 
 /*
-    fostlib::pg::recordset_range::const_iterator
+    fostlib::pg::recordset::const_iterator
 */
 
 
-fostlib::pg::recordset_range::record_type *fostlib::pg::recordset_range::const_iterator::operator -> () const {
+fostlib::pg::recordset::record_type *fostlib::pg::recordset::const_iterator::operator -> () const {
     return &row;
 }
 
