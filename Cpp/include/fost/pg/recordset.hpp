@@ -19,9 +19,20 @@ namespace fostlib {
     namespace pg {
 
 
+        class recordset;
+
+
+        /// A single row in the results
+        class record {
+            std::vector<json> fields;
+            record(std::vector<json>);
+
+            friend class recordset;
+        };
+
+
         /// A range-based recordset
         class recordset {
-            friend class connection;
             struct impl;
             std::unique_ptr<impl> pimpl;
         private:
@@ -33,21 +44,31 @@ namespace fostlib {
             /// Allow public desctruction
             ~recordset();
 
-            /// A single row from a recordset
-            using record_type = const std::vector<json>;
-
             /// The recordset iterator
             class const_iterator {
-                record_type row;
+                struct impl;
+                std::unique_ptr<impl> pimpl;
+                const_iterator(recordset::impl&, bool);
             public:
+                /// Default construct needs to be allowed
+                const_iterator();
+                /// Allow copying
+                const_iterator(const const_iterator &);
+                /// Allow destruction
+                ~const_iterator();
 
-                record_type *operator -> () const;
+                record *operator -> () const;
+
+                friend class recordset;
             };
 
             /// The first record
             const_iterator begin() const;
             /// The end of the recordset
             const_iterator end() const;
+
+            friend class const_iterator;
+            friend class connection;
         };
 
 

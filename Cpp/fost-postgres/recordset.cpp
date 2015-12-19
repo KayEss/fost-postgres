@@ -11,6 +11,12 @@
 
 
 /*
+    fostlib::pg::record
+*/
+
+
+
+/*
     fostlib::pg::recordset
 */
 
@@ -28,7 +34,7 @@ fostlib::pg::recordset::~recordset() {
 
 
 fostlib::pg::recordset::const_iterator fostlib::pg::recordset::begin() const {
-    return fostlib::pg::recordset::const_iterator();
+    return fostlib::pg::recordset::const_iterator(*pimpl, true);
 }
 
 
@@ -37,7 +43,21 @@ fostlib::pg::recordset::const_iterator fostlib::pg::recordset::begin() const {
 */
 
 
-fostlib::pg::recordset::record_type *fostlib::pg::recordset::const_iterator::operator -> () const {
-    return &row;
+fostlib::pg::recordset::const_iterator::const_iterator()
+: pimpl(new impl(pqxx::result::const_iterator())) {
+}
+fostlib::pg::recordset::const_iterator::const_iterator(const const_iterator &other)
+: pimpl(new impl(other.pimpl->position)) {
+}
+fostlib::pg::recordset::const_iterator::const_iterator(recordset::impl &rs, bool begin)
+: pimpl(new impl(begin ? rs.records.begin() : rs.records.end())) {
+}
+
+
+fostlib::pg::recordset::const_iterator::~const_iterator() = default;
+
+
+fostlib::pg::record *fostlib::pg::recordset::const_iterator::operator -> () const {
+    throw fostlib::exceptions::not_implemented(__FUNCTION__);
 }
 
