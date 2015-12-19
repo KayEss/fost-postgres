@@ -48,10 +48,16 @@ namespace fostlib {
                 /// Allow destruction
                 ~const_iterator();
 
+                /// Compare for equality
+                bool operator == (const const_iterator &) const;
+
                 /// Dereference the iterator
                 const record *operator -> () const;
                 /// Dereference the iterator
                 const record &operator * () const;
+
+                /// Move to the next row
+                const_iterator &operator ++ ();
 
                 friend class recordset;
             };

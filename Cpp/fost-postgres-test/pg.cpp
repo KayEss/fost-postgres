@@ -23,6 +23,8 @@ FSL_TEST_FUNCTION(connect_default) {
     auto record = records.begin();
     FSL_CHECK_EQ(record->size(), 1u);
     FSL_CHECK_EQ((*record)[0], fostlib::json("1"));
+    FSL_CHECK(records.begin() != records.end());
+    FSL_CHECK(++records.begin() == records.end());
 }
 
 

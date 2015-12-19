@@ -40,6 +40,9 @@ fostlib::pg::recordset::~recordset() {
 fostlib::pg::recordset::const_iterator fostlib::pg::recordset::begin() const {
     return fostlib::pg::recordset::const_iterator(*pimpl, true);
 }
+fostlib::pg::recordset::const_iterator fostlib::pg::recordset::end() const {
+    return fostlib::pg::recordset::const_iterator(*pimpl, false);
+}
 
 
 /*
@@ -78,10 +81,25 @@ fostlib::pg::recordset::const_iterator::const_iterator(recordset::impl &rs, bool
 fostlib::pg::recordset::const_iterator::~const_iterator() = default;
 
 
+bool fostlib::pg::recordset::const_iterator::operator == (const const_iterator &other) const {
+    if ( pimpl && other.pimpl ) {
+        return pimpl->position == other.pimpl->position;
+    } else {
+        return pimpl == other.pimpl;
+    }
+}
+
+
 const fostlib::pg::record *fostlib::pg::recordset::const_iterator::operator -> () const {
     return &pimpl->row;
 }
 const fostlib::pg::record &fostlib::pg::recordset::const_iterator::operator * () const {
     return pimpl->row;
+}
+
+
+fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::operator ++ () {
+    ++pimpl->position;
+    return *this;
 }
 
