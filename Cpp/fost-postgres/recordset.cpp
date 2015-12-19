@@ -80,6 +80,9 @@ namespace {
                 fields[index] = fostlib::json();
             } else {
                 switch ( types[index] ) {
+                case 16: // bool
+                    fields[index] = fostlib::json(pos[index].c_str()[0] == 't' ? true : false);
+                    break;
                 case 21: // int2
                 case 23: // int4
                 case 20: // int8

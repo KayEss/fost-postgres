@@ -49,6 +49,10 @@ namespace {
         FSL_CHECK(++records.begin() == records.end());
     }
 }
+FSL_TEST_FUNCTION(type_bool) {
+    check("SELECT 't'::bool", true);
+    check("SELECT 'f'::bool", false);
+}
 FSL_TEST_FUNCTION(type_int2) {
     check("SELECT 1::int2", 1);
 }
