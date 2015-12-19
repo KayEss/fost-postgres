@@ -62,6 +62,13 @@ namespace {
             throw fostlib::exceptions::parse_error("Whilst parsing an int", value);
         return ret;
     }
+    double float_parser(const char *value) {
+        double ret{0};
+        if ( !boost::spirit::parse(value,
+                boost::spirit::real_parser<double>()[phoenix::var(ret) = phoenix::arg1]).full )
+            throw fostlib::exceptions::parse_error("Whilst parsing a float", value);
+        return ret;
+    }
 
     void fillin(
         const std::vector<pqxx::oid> &types,
@@ -77,6 +84,10 @@ namespace {
                 case 23: // int4
                 case 20: // int8
                     fields[index] = fostlib::json(int_parser(pos[index].c_str()));
+                    break;
+                case 700: // float4
+                case 701: // float8
+                    fields[index] = fostlib::json(float_parser(pos[index].c_str()));
                     break;
                 default:
                     fields[index] = fostlib::coerce<fostlib::json>(

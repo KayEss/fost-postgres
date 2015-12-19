@@ -58,3 +58,10 @@ FSL_TEST_FUNCTION(type_int4) {
 FSL_TEST_FUNCTION(type_int8) {
     check("SELECT 1::int8", 1);
 }
+FSL_TEST_FUNCTION(type_float4) {
+    check("SELECT 1::float4", 1.0);
+}
+FSL_TEST_FUNCTION(type_float8) {
+    check("SELECT 1::float8", 1.0);
+}
+
