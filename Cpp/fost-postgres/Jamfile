@@ -15,7 +15,6 @@ lib fost-postgres
         $(TARGET_REQUIREMENTS)
         <define>PQXX_HAVE_BOOST_SMART_PTR
         <define>PQXXTR1=boost
-        <include>/usr/include/postgresql/9.4/server/
     ;
 
 fost-install fost-postgres ;

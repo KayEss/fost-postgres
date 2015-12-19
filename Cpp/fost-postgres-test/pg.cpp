@@ -36,3 +36,25 @@ FSL_TEST_FUNCTION(connect_specified) {
     FSL_CHECK_EQ((*record)[0], fostlib::json(1));
 }
 
+
+namespace {
+    template<typename A>
+    void check(const char *sql, A value) {
+        fostlib::pg::connection cnx;
+        auto records = cnx.exec(sql);
+        auto record = records.begin();
+        FSL_CHECK_EQ(record->size(), 1u);
+        FSL_CHECK_EQ((*record)[0], fostlib::json(value));
+        FSL_CHECK(records.begin() != records.end());
+        FSL_CHECK(++records.begin() == records.end());
+    }
+}
+FSL_TEST_FUNCTION(type_int2) {
+    check("SELECT 1::int2", 1);
+}
+FSL_TEST_FUNCTION(type_int4) {
+    check("SELECT 1::int4", 1);
+}
+FSL_TEST_FUNCTION(type_int8) {
+    check("SELECT 1::int8", 1);
+}

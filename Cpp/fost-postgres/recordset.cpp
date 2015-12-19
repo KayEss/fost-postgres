@@ -6,10 +6,6 @@
 */
 
 
-#include <postgres.h>
-#include <postgresql/libpq-fe.h>
-#include <catalog/pg_type.h>
-
 #include <fost/core>
 #include <fost/exception/parse_error.hpp>
 #include <fost/log>
@@ -76,14 +72,10 @@ namespace {
             if ( pos[index].is_null() ) {
                 fields[index] = fostlib::json();
             } else {
-                fostlib::log::debug()
-                    ("index", index)
-                    ("oid", types[index])
-                    ("INT4OID", INT4OID);
                 switch ( types[index] ) {
-                case INT2OID:
-                case INT4OID:
-                case INT8OID:
+                case 21: // int2
+                case 23: // int4
+                case 20: // int8
                     fields[index] = fostlib::json(int_parser(pos[index].c_str()));
                     break;
                 default:
