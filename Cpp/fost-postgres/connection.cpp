@@ -7,7 +7,7 @@
 
 
 #include <fost/pg/connection.hpp>
-#include <fost/pg/recordset-range.hpp>
+#include <fost/pg/recordset.hpp>
 #include "connection.hpp"
 
 
