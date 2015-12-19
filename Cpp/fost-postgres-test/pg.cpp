@@ -77,4 +77,10 @@ FSL_TEST_FUNCTION(type_json) {
     check("SELECT 'false'::json", false);
     check("SELECT '{}'::json", fostlib::json::object_t());
 }
+FSL_TEST_FUNCTION(type_jsonb) {
+    check("SELECT 'null'::jsonb", fostlib::json());
+    check("SELECT 'true'::jsonb", true);
+    check("SELECT 'false'::jsonb", false);
+    check("SELECT '{}'::jsonb", fostlib::json::object_t());
+}
 

@@ -93,6 +93,7 @@ namespace {
                     fields[index] = fostlib::json(float_parser(pos[index].c_str()));
                     break;
                 case 114: // json
+                case 3802: // jsonb
                     fields[index] = fostlib::json::parse(pos[index].c_str());
                     break;
                 default:
