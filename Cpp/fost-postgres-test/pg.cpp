@@ -71,4 +71,10 @@ FSL_TEST_FUNCTION(type_float4) {
 FSL_TEST_FUNCTION(type_float8) {
     check("SELECT 1::float8", 1.0);
 }
+FSL_TEST_FUNCTION(type_json) {
+    check("SELECT 'null'::json", fostlib::json());
+    check("SELECT 'true'::json", true);
+    check("SELECT 'false'::json", false);
+    check("SELECT '{}'::json", fostlib::json::object_t());
+}
 
