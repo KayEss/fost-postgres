@@ -69,6 +69,14 @@ namespace {
 }
 
 
+fostlib::pg::connection &fostlib::pg::connection::insert(const char *relation, const json &values) {
+    exec(coerce<utf8_string>(
+        string("INSERT INTO ") + relation +
+            " (" + columns(values) + ") VALUES (" + value_string(values) + ")"));
+    return *this;
+}
+
+
 fostlib::pg::connection &fostlib::pg::connection::upsert(
     const char *relation, const json &keys, const json &values
 ) {
