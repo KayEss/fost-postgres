@@ -16,10 +16,11 @@
 
 struct fostlib::pg::connection::impl {
     pqxx::connection pqcnx;
-    pqxx::transaction<> trans;
+    using transaction_type = pqxx::transaction<>;
+    std::unique_ptr<transaction_type> trans;
 
     impl(const fostlib::utf8_string &dsn)
-    : pqcnx(dsn.underlying()), trans(pqcnx) {
+    : pqcnx(dsn.underlying()), trans(new transaction_type(pqcnx)) {
     }
 };
 

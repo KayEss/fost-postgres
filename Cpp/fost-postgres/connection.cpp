@@ -28,7 +28,8 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
 
 
 void fostlib::pg::connection::commit() {
-    pimpl->trans.commit();
+    pimpl->trans->commit();
+    pimpl->trans = std::make_unique<impl::transaction_type>(pimpl->pqcnx);
 }
 
 
