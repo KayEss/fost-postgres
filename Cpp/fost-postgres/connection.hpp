@@ -16,7 +16,7 @@
 
 struct fostlib::pg::connection::impl {
     pqxx::connection pqcnx;
-    using transaction_type = pqxx::transaction<>;
+    using transaction_type = pqxx::transaction<pqxx::serializable>;
     std::unique_ptr<transaction_type> trans;
 
     impl(const fostlib::utf8_string &dsn)
