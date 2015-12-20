@@ -21,7 +21,8 @@ namespace fostlib {
         class recordset;
 
 
-        /// A read/write database connection
+        /// A read/write database connection. Also provides a low level API
+        /// for interacting with the database.
         class connection {
             friend class recordset;
             struct impl;
@@ -34,8 +35,16 @@ namespace fostlib {
             /// Destructor so we can link
             ~connection();
 
+            /// Commit the transaction
+            void commit();
+
             /// Return a recordset range from the execution of the command
             recordset exec(const utf8_string &);
+            /// Perform a one row INSERT statement. Pass a JSON object that specifies
+            /// the field names and values
+            connection &insert(const char *relation, const json &values);
+            /// Perform an UPSERT (INSERT/CONFLICT). Give the keys and values
+            connection &upsert(const char *relation, const json &keys, const json &values);
         };
 
 

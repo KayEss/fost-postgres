@@ -26,3 +26,72 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
     return std::move(recordset(*pimpl, sql));
 }
 
+
+void fostlib::pg::connection::commit() {
+    pimpl->trans.commit();
+}
+
+
+namespace {
+    fostlib::string column(const fostlib::json &name) {
+        return '"' + fostlib::coerce<fostlib::string>(name) + '"';
+    }
+    fostlib::string columns(fostlib::string cols, const fostlib::json &def) {
+        for ( fostlib::json::const_iterator iter(def.begin()); iter != def.end(); ++iter ) {
+            if ( cols.empty() ) {
+                cols = column(iter.key());
+            } else {
+                cols += ", " + column(iter.key());
+            }
+        }
+        return cols;
+    }
+    fostlib::string columns(const fostlib::json &def) {
+        return columns(fostlib::string(), def);
+    }
+
+    fostlib::string value(const fostlib::json &val) {
+        return '\'' + fostlib::coerce<fostlib::string>(val) + '\'';
+    }
+    fostlib::string value_string(fostlib::string vals, const fostlib::json &def) {
+        for ( const auto &val : def ) {
+            if ( vals.empty() ) {
+                vals = value(val);
+            } else {
+                vals += ", " + value(val);
+            }
+        }
+        return vals;
+    }
+    fostlib::string value_string(const fostlib::json &def) {
+        return value_string(fostlib::string(), def);
+    }
+}
+
+
+fostlib::pg::connection &fostlib::pg::connection::upsert(
+    const char *relation, const json &keys, const json &values
+) {
+    string sql("INSERT INTO "),
+        key_names(columns(keys)),
+        value_names(columns(key_names, values)),
+        updates;
+    sql += relation;
+    sql += " (" + value_names + ") VALUES (" + value_string(value_string(keys), values) + ") ";
+    sql += "ON CONFLICT (" + key_names + ") DO ";
+    for ( fostlib::json::const_iterator iter(values.begin()); iter != values.end(); ++iter ) {
+        if ( updates.empty() ) {
+            updates = column(iter.key()) + " = EXCLUDED." + column(iter.key());
+        } else {
+            updates += ", " + column(iter.key()) + " = EXCLUDED." + column(iter.key());
+        }
+    }
+    if ( updates.empty() ) {
+        sql += "NOTHING";
+    } else {
+        sql += "UPDATE SET " + updates;
+    }
+    exec(coerce<utf8_string>(sql));
+    return *this;
+}
+
