@@ -70,6 +70,23 @@ namespace {
 }
 
 
+fostlib::pg::recordset fostlib::pg::connection::select(const char *relation, const json &values) {
+    string select = "SELECT * FROM ", where;
+    select += relation;
+    for ( fostlib::json::const_iterator iter(values.begin()); iter != values.end(); ++iter ) {
+        if ( where.empty() ) {
+            where = column(iter.key()) + " = " + value(*iter);
+        } else {
+            where += " AND " + column(iter.key()) + " = " + value(*iter);
+        }
+    }
+    if ( not where.empty() ) {
+        select += " WHERE " + where;
+    }
+    return exec(coerce<utf8_string>(select));
+}
+
+
 fostlib::pg::connection &fostlib::pg::connection::insert(const char *relation, const json &values) {
     exec(coerce<utf8_string>(
         string("INSERT INTO ") + relation +
