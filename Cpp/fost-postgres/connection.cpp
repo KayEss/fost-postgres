@@ -1,5 +1,5 @@
 /*
-    Copyright 2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2015-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -16,6 +16,9 @@ fostlib::pg::connection::connection()
 }
 fostlib::pg::connection::connection(const string &host)
 : pimpl(new impl(coerce<utf8_string>("host=" + host))) {
+}
+fostlib::pg::connection::connection(const string &host, const string &db)
+: pimpl(new impl(coerce<utf8_string>("host=" + host + " dbname=" + db))) {
 }
 
 

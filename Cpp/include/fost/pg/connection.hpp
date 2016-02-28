@@ -1,5 +1,5 @@
 /*
-    Copyright 2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2015-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -32,6 +32,8 @@ namespace fostlib {
             connection();
             /// Connect to a specified host without specifying a password
             connection(const string &);
+            /// Connect to a specified host and database
+            connection(const string &, const string &);
             /// Destructor so we can link
             ~connection();
 

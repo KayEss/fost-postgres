@@ -1,3 +1,9 @@
+2016-02-28  Kirit Saelensminde  <kirit@felspar.com>
+ Add support for fetching the column names.
+
+2015-12-20  Kirit Saelensminde  <kirit@felspar.com>
+ Start to sketch out a new Postgres specific API which will eventually displace libpqxx.
+
 2014-09-07  Kirit Saelensminde  <kirit@felspar.com>
  Change the test database configuration to assume ident/trust based authentication.
 

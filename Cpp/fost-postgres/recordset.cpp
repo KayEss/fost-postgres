@@ -1,5 +1,5 @@
 /*
-    Copyright 2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2015-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -38,6 +38,20 @@ fostlib::pg::recordset::recordset(recordset &&other)
 
 
 fostlib::pg::recordset::~recordset() {
+}
+
+
+std::vector<fostlib::nullable<fostlib::string>> fostlib::pg::recordset::columns() const {
+    std::vector<fostlib::nullable<fostlib::string>> names;
+    names.reserve(pimpl->names.size());
+    for ( auto c : pimpl->names ) {
+        if ( c == nullptr || c[0] == 0 ) {
+            names.push_back(fostlib::null);
+        } else {
+            names.push_back(fostlib::string(c));
+        }
+    }
+    return names;
 }
 
 
