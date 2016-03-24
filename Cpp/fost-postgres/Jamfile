@@ -11,6 +11,7 @@ lib fost-postgres
         connection.cpp
         pqxx-driver.cpp
         recordset.cpp
+        stored-procedure.cpp
     :
         $(TARGET_REQUIREMENTS)
         <define>PQXX_HAVE_BOOST_SMART_PTR

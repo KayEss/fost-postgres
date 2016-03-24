@@ -20,13 +20,17 @@ namespace fostlib {
 
 
         class record;
+        class unbound_procedure;
 
 
         /// A range-based recordset
         class recordset {
+            friend class unbound_procedure;
+
             struct impl;
             std::unique_ptr<impl> pimpl;
-        private:
+
+            recordset(std::unique_ptr<impl> &&p);
             recordset(connection::impl &, const utf8_string &);
 
         public:

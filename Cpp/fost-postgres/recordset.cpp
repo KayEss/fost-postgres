@@ -29,6 +29,9 @@ fostlib::pg::record::record(std::size_t columns)
 */
 
 
+fostlib::pg::recordset::recordset(std::unique_ptr<recordset::impl> &&p)
+: pimpl(std::move(p)) {
+}
 fostlib::pg::recordset::recordset(connection::impl &cnx, const utf8_string &sql)
 : pimpl(new impl(cnx, sql)) {
 }

@@ -8,7 +8,10 @@
 
 #include <fost/pg/connection.hpp>
 #include <fost/pg/recordset.hpp>
+#include <fost/pg/stored-procedure.hpp>
 #include "connection.hpp"
+
+#include <atomic>
 
 
 fostlib::pg::connection::connection()
@@ -54,21 +57,24 @@ namespace {
         return columns(fostlib::string(), def);
     }
 
-    fostlib::string value(const fostlib::json &val) {
-        return '\'' + fostlib::coerce<fostlib::string>(val) + '\'';
+    template<typename T>
+    fostlib::string value(T &t, const fostlib::json &val) {
+        return t.quote(fostlib::coerce<fostlib::string>(val).std_str());
     }
-    fostlib::string value_string(fostlib::string vals, const fostlib::json &def) {
+    template<typename T>
+    fostlib::string value_string(T &t, fostlib::string vals, const fostlib::json &def) {
         for ( const auto &val : def ) {
             if ( vals.empty() ) {
-                vals = value(val);
+                vals = value(t, val);
             } else {
-                vals += ", " + value(val);
+                vals += ", " + value(t, val);
             }
         }
         return vals;
     }
-    fostlib::string value_string(const fostlib::json &def) {
-        return value_string(fostlib::string(), def);
+    template<typename T>
+    fostlib::string value_string(T &t, const fostlib::json &def) {
+        return value_string(t, fostlib::string(), def);
     }
 }
 
@@ -78,9 +84,9 @@ fostlib::pg::recordset fostlib::pg::connection::select(const char *relation, con
     select += relation;
     for ( fostlib::json::const_iterator iter(values.begin()); iter != values.end(); ++iter ) {
         if ( where.empty() ) {
-            where = column(iter.key()) + " = " + value(*iter);
+            where = column(iter.key()) + " = " + value(*pimpl->trans, *iter);
         } else {
-            where += " AND " + column(iter.key()) + " = " + value(*iter);
+            where += " AND " + column(iter.key()) + " = " + value(*pimpl->trans, *iter);
         }
     }
     if ( not where.empty() ) {
@@ -93,7 +99,7 @@ fostlib::pg::recordset fostlib::pg::connection::select(const char *relation, con
 fostlib::pg::connection &fostlib::pg::connection::insert(const char *relation, const json &values) {
     exec(coerce<utf8_string>(
         string("INSERT INTO ") + relation +
-            " (" + columns(values) + ") VALUES (" + value_string(values) + ")"));
+            " (" + columns(values) + ") VALUES (" + value_string(*pimpl->trans, values) + ")"));
     return *this;
 }
 
@@ -106,7 +112,8 @@ fostlib::pg::connection &fostlib::pg::connection::upsert(
         value_names(columns(key_names, values)),
         updates;
     sql += relation;
-    sql += " (" + value_names + ") VALUES (" + value_string(value_string(keys), values) + ") ";
+    sql += " (" + value_names + ") VALUES "
+        "(" + value_string(*pimpl->trans, value_string(*pimpl->trans, keys), values) + ") ";
     sql += "ON CONFLICT (" + key_names + ") DO ";
     for ( fostlib::json::const_iterator iter(values.begin()); iter != values.end(); ++iter ) {
         if ( updates.empty() ) {
@@ -122,5 +129,15 @@ fostlib::pg::connection &fostlib::pg::connection::upsert(
     }
     exec(coerce<utf8_string>(sql));
     return *this;
+}
+
+
+fostlib::pg::unbound_procedure fostlib::pg::connection::procedure(
+    const fostlib::utf8_string &cmd
+) {
+    static std::atomic<unsigned int> number;
+    std::string name = "sp_anon_" + std::to_string(++number);
+    pimpl->pqcnx.prepare(name, cmd.underlying());
+    return unbound_procedure(*this, name);
 }
 

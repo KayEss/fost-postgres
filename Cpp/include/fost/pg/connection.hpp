@@ -19,12 +19,14 @@ namespace fostlib {
 
 
         class recordset;
+        class unbound_procedure;
 
 
         /// A read/write database connection. Also provides a low level API
         /// for interacting with the database.
         class connection {
             friend class recordset;
+            friend class unbound_procedure;
             struct impl;
             std::unique_ptr<impl> pimpl;
         public:
@@ -49,6 +51,9 @@ namespace fostlib {
             connection &insert(const char *relation, const json &values);
             /// Perform an UPSERT (INSERT/CONFLICT). Give the keys and values
             connection &upsert(const char *relation, const json &keys, const json &values);
+
+            /// Create an anonymous stored procedure
+            unbound_procedure procedure(const utf8_string &);
         };
 
 
