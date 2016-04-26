@@ -49,6 +49,8 @@ namespace fostlib {
             /// Perform a one row INSERT statement. Pass a JSON object that specifies
             /// the field names and values
             connection &insert(const char *relation, const json &values);
+            /// Performa one row UPDATE statement. Give the keys and values
+            connection &update(const char *relation, const json &keys, const json &values);
             /// Perform an UPSERT (INSERT/CONFLICT). Give the keys and values
             connection &upsert(const char *relation, const json &keys, const json &values);
 

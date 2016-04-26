@@ -104,6 +104,32 @@ fostlib::pg::connection &fostlib::pg::connection::insert(const char *relation, c
 }
 
 
+fostlib::pg::connection &fostlib::pg::connection::update(
+    const char *relation, const json &keys, const json &values
+) {
+    string sql("UPDATE "), updates, where;
+    sql += relation;
+    sql += " SET ";
+    for ( fostlib::json::const_iterator iter(values.begin()); iter != values.end(); ++iter ) {
+        if ( updates.empty() ) {
+            updates = column(iter.key()) + "=" + value(*pimpl->trans, *iter);
+        } else {
+            updates += ", " + column(iter.key()) + "=" + value(*pimpl->trans, *iter);
+        }
+    }
+    for ( fostlib::json::const_iterator iter(keys.begin()); iter != keys.end(); ++iter ) {
+        if ( where.empty() ) {
+            where = column(iter.key()) + "=" + value(*pimpl->trans, *iter);
+        } else {
+            where += " AND " + column(iter.key()) + "=" + value(*pimpl->trans, *iter);
+        }
+    }
+    sql += updates + " WHERE " + where;
+    exec(coerce<utf8_string>(sql));
+    return *this;
+}
+
+
 fostlib::pg::connection &fostlib::pg::connection::upsert(
     const char *relation, const json &keys, const json &values
 ) {
