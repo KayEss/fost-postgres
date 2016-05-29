@@ -12,6 +12,13 @@
 #include "connection.hpp"
 
 #include <atomic>
+#include <fost/insert>
+
+
+
+/*
+    fostlib::pg::connection
+*/
 
 
 fostlib::pg::connection::connection()
@@ -23,9 +30,32 @@ fostlib::pg::connection::connection(const string &host)
 fostlib::pg::connection::connection(const string &host, const string &db)
 : pimpl(new impl(coerce<utf8_string>("host=" + host + " dbname=" + db))) {
 }
+namespace {
+    std::pair<fostlib::utf8_string, fostlib::json> from_json(const fostlib::json &conf) {
+        fostlib::utf8_string dsn;
+        fostlib::json effective;
+        for ( auto &key : {"host", "dbname", "user"} ) {
+            if ( conf.has_key(key) ) {
+                fostlib::insert(effective, key, conf[key]);
+                dsn += fostlib::utf8_string(key) + "='" +
+                    fostlib::coerce<fostlib::utf8_string>(
+                        fostlib::coerce<fostlib::string>(conf[key])) + "' ";
+            }
+        }
+        return std::make_pair(dsn, effective);
+    }
+}
+fostlib::pg::connection::connection(const json &conf)
+: pimpl(new impl(from_json(conf))) {
+}
 
 
 fostlib::pg::connection::~connection() = default;
+
+
+const fostlib::json &fostlib::pg::connection::configuration() const {
+    return pimpl->configuration;
+}
 
 
 fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {

@@ -19,8 +19,20 @@ struct fostlib::pg::connection::impl {
     using transaction_type = pqxx::transaction<pqxx::serializable>;
     std::unique_ptr<transaction_type> trans;
 
+    json configuration;
+
     impl(const fostlib::utf8_string &dsn)
-    : pqcnx(dsn.underlying()), trans(new transaction_type(pqcnx)) {
+    : pqcnx(dsn.underlying()),
+        trans(new transaction_type(pqcnx)),
+        configuration(dsn.underlying().c_str())
+    {
+    }
+
+    impl(const std::pair<fostlib::utf8_string, fostlib::json>  &dsn)
+    : pqcnx(dsn.first.underlying()),
+        trans(new transaction_type(pqcnx)),
+        configuration(dsn.second)
+    {
     }
 };
 

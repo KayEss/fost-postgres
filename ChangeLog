@@ -1,3 +1,6 @@
+2016-05-29  Kirit Saelensminde  <kirit@felspar.com>
+ Allow JSON to be used in connection configuration and for the effective configuration to be retrieved.
+
 2016-03-24  Kirit Saelensminde  <kirit@felspar.com>
  Add basic support for stored procedures.
 

@@ -36,8 +36,17 @@ namespace fostlib {
             connection(const string &);
             /// Connect to a specified host and database
             connection(const string &, const string &);
+            /// Connect using the provided JSON configuration
+            /// Supported items are:
+            /// 1. dbname -- Name of the database
+            /// 2. host -- The host (or path when starting with /)
+            /// 3. user -- The username
+            connection(const json &);
             /// Destructor so we can link
             ~connection();
+
+            /// Retrieve the connection configuration details
+            const json &configuration() const;
 
             /// Commit the transaction
             void commit();
