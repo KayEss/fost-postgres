@@ -18,6 +18,9 @@ namespace fostlib {
     namespace pg {
 
 
+        extern const module c_fost_pg;
+
+
         class recordset;
         class unbound_procedure;
 

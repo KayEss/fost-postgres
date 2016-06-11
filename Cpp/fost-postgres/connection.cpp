@@ -15,6 +15,8 @@
 #include <fost/insert>
 
 
+const fostlib::module fostlib::pg::c_fost_pg(c_fost, "pg");
+
 
 /*
     fostlib::pg::connection
