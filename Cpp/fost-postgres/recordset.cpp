@@ -113,6 +113,10 @@ namespace {
                 case 3802: // jsonb
                     fields[index] = fostlib::json::parse(pos[index].c_str());
                     break;
+                case 1114: // timestamp without time zone
+                    throw fostlib::exceptions::not_implemented(__FUNCTION__,
+                        "Timestamp fields without time zones are explicitly disabled. "
+                        "Fix your schema to use 'timestamp with time zone'");
                 default:
                     fields[index] = fostlib::coerce<fostlib::json>(
                         fostlib::utf8_string(pos[index].c_str()));
