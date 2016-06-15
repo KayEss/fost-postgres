@@ -91,7 +91,11 @@ namespace {
 
     template<typename T>
     fostlib::string value(T &t, const fostlib::json &val) {
-        return t.quote(fostlib::coerce<fostlib::string>(val).std_str());
+        if ( val.isnull() ) {
+            return "NULL";
+        } else {
+            return t.quote(fostlib::coerce<fostlib::string>(val).std_str());
+        }
     }
     template<typename T>
     fostlib::string value_string(T &t, fostlib::string vals, const fostlib::json &def) {
