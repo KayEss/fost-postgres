@@ -13,6 +13,7 @@
 
 #include <atomic>
 #include <fost/insert>
+#include <fost/log>
 
 
 const fostlib::module fostlib::pg::c_fost_pg(c_fost, "pg");
@@ -61,7 +62,16 @@ const fostlib::json &fostlib::pg::connection::configuration() const {
 
 
 fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
-    return std::move(recordset(*pimpl, sql));
+    try {
+        return std::move(recordset(*pimpl, sql));
+    } catch ( std::exception &e ) {
+        fostlib::log::error(c_fost_pg)
+            ("", "Error executing SQL command")
+            ("sql", sql)
+            ("exception", "what", e.what())
+            ("exception", "type", typeid(e).name());
+        throw;
+    }
 }
 
 
