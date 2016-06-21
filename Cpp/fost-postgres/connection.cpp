@@ -72,8 +72,8 @@ void fostlib::pg::connection::commit() {
 
 
 namespace {
-    fostlib::string column(const fostlib::json &name) {
-        return '"' + fostlib::coerce<fostlib::string>(name) + '"';
+    inline fostlib::string column(const fostlib::json &name) {
+        return fostlib::coerce<fostlib::string>(name);
     }
     fostlib::string columns(fostlib::string cols, const fostlib::json &def) {
         for ( fostlib::json::const_iterator iter(def.begin()); iter != def.end(); ++iter ) {
