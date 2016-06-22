@@ -148,6 +148,22 @@ fostlib::pg::connection &fostlib::pg::connection::insert(const char *relation, c
             " (" + columns(values) + ") VALUES (" + value_string(*pimpl->trans, values) + ")"));
     return *this;
 }
+fostlib::pg::recordset fostlib::pg::connection::insert(
+    const char *relation, const json &values, const std::vector<fostlib::string> &returning
+) {
+    string ret_vals;
+    for ( const auto &s : returning ) {
+        if ( ret_vals.empty() ) {
+            ret_vals = s;
+        } else {
+            ret_vals += ", " + s;
+        }
+    }
+    return exec(coerce<utf8_string>(
+        string("INSERT INTO ") + relation +
+            " (" + columns(values) + ") VALUES (" + value_string(*pimpl->trans, values) + ") "
+            "RETURNING " + ret_vals));
+}
 
 
 fostlib::pg::connection &fostlib::pg::connection::update(
