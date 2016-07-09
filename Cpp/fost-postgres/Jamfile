@@ -7,8 +7,11 @@ lib fost-postgres
         ../../../fost-base/Cpp/fost-core
         ../../../fost-orm/Cpp/fost-schema
         ../../../fost-orm/Cpp/fost-sql
-        ../fost-pqxx//fost-pqxx
+        ../fost-pqxx
+        connection.cpp
         pqxx-driver.cpp
+        recordset.cpp
+        stored-procedure.cpp
     :
         $(TARGET_REQUIREMENTS)
         <define>PQXX_HAVE_BOOST_SMART_PTR

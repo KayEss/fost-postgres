@@ -1,3 +1,18 @@
+2016-06-11  Kirit Saelensminde  <kirit@felspar.com>
+ Warn about type OIDs that are unkown and completely disallow time stamps with time zone information.
+
+2016-05-29  Kirit Saelensminde  <kirit@felspar.com>
+ Allow JSON to be used in connection configuration and for the effective configuration to be retrieved.
+
+2016-03-24  Kirit Saelensminde  <kirit@felspar.com>
+ Add basic support for stored procedures.
+
+2016-02-28  Kirit Saelensminde  <kirit@felspar.com>
+ Add support for fetching the column names.
+
+2015-12-20  Kirit Saelensminde  <kirit@felspar.com>
+ Start to sketch out a new Postgres specific API which will eventually displace libpqxx.
+
 2014-09-07  Kirit Saelensminde  <kirit@felspar.com>
  Change the test database configuration to assume ident/trust based authentication.
 
