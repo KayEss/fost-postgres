@@ -47,11 +47,21 @@ fostlib::pg::recordset::~recordset() {
 std::vector<fostlib::nullable<fostlib::string>> fostlib::pg::recordset::columns() const {
     std::vector<fostlib::nullable<fostlib::string>> names;
     names.reserve(pimpl->names.size());
+    std::map<int64_t, fostlib::string> oid_prefix;
     for ( auto c : pimpl->names ) {
         if ( c == nullptr || c[0] == 0 ) {
             names.push_back(fostlib::null);
         } else {
-            names.push_back(fostlib::string(c));
+            const string colname{c};
+            const auto table = pimpl->records.column_table(coerce<int>(names.size()));
+            if ( colname.endswith("__tableoid") ) {
+                oid_prefix[table] = colname.substr(0, colname.length() - 8);
+                names.push_back(colname);
+            } else if ( oid_prefix.find(table) != oid_prefix.end() ) {
+                names.push_back(oid_prefix[table] + colname);
+            } else {
+                names.push_back(colname);
+            }
         }
     }
     return names;
@@ -103,6 +113,7 @@ namespace {
                 case 21: // int2
                 case 23: // int4
                 case 20: // int8
+                case 26: // oid
                     fields[index] = fostlib::json(int_parser(pos[index].c_str()));
                     break;
                 case 700: // float4

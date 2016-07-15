@@ -1,3 +1,6 @@
+2016-07-15  Kirit Saelensminde  <kirit@felspar.com>
+ Make use of table OIDs to distinguish names of columns.
+
 2016-06-11  Kirit Saelensminde  <kirit@felspar.com>
  Warn about type OIDs that are unkown and completely disallow time stamps with time zone information.
 
