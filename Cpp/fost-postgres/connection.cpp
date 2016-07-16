@@ -103,6 +103,8 @@ namespace {
     fostlib::string value(T &t, const fostlib::json &val) {
         if ( val.isnull() ) {
             return "NULL";
+        } else if ( val.isobject() ) {
+            return t.quote(fostlib::json::unparse(val, false).std_str());
         } else {
             return t.quote(fostlib::coerce<fostlib::string>(val).std_str());
         }

@@ -1,3 +1,6 @@
+2016-07-16  Kirit Saelensminde  <kirit@felspar.com>
+ Add support for JSON objects in the SQL, on the assumption that they are for either json or jsonb in Postgres.
+
 2016-07-15  Kirit Saelensminde  <kirit@felspar.com>
  Make use of table OIDs to distinguish names of columns.
 
