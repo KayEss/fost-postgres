@@ -45,6 +45,10 @@ namespace fostlib {
             /// 2. host -- The host (or path when starting with /)
             /// 3. user -- The username
             connection(const json &);
+
+            /// Move constructor
+            connection(connection &&cnx);
+
             /// Destructor so we can link
             ~connection();
 

@@ -53,6 +53,11 @@ fostlib::pg::connection::connection(const json &conf)
 }
 
 
+fostlib::pg::connection::connection(connection &&cnx)
+: pimpl(std::move(cnx.pimpl)) {
+}
+
+
 fostlib::pg::connection::~connection() = default;
 
 
@@ -63,7 +68,7 @@ const fostlib::json &fostlib::pg::connection::configuration() const {
 
 fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
     try {
-        return std::move(recordset(*pimpl, sql));
+        return recordset(*pimpl, sql);
     } catch ( std::exception &e ) {
         fostlib::log::error(c_fost_pg)
             ("", "Error executing SQL command")
