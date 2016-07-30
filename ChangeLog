@@ -1,3 +1,6 @@
+2016-07-30  Kirit Saelensminde  <kirit@felspar.com>
+ Stored procedures can now be called with JSON arguments.
+
 2016-07-29  Kirit Saelensminde  <kirit@felspar.com>
  Make the database connection move constructible.
 

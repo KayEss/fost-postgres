@@ -43,6 +43,7 @@ namespace fostlib {
 //             bound_procedure &operator () (const fostlib::string &);
 
             recordset exec(const std::vector<fostlib::string> &args);
+            recordset exec(const std::vector<fostlib::json> &args);
         };
 
 

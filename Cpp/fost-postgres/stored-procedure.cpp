@@ -28,3 +28,18 @@ fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
     return recordset(std::make_unique<recordset::impl>(sp.exec()));
 }
 
+
+fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
+    const std::vector<fostlib::json> &args
+) {
+    auto sp = cnx.pimpl->trans->prepared(name);
+    for ( const auto &a : args ) {
+        if ( a.isnull() ) {
+            sp();
+        } else {
+            sp(fostlib::coerce<fostlib::string>(a).c_str());
+        }
+    }
+    return recordset(std::make_unique<recordset::impl>(sp.exec()));
+}
+
