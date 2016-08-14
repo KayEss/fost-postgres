@@ -133,6 +133,7 @@ namespace {
                         ("", "Postgres type decoding -- unknown type OID")
                         ("oid", types[index]);
                 case 25: // text
+                case 1043: // varchar
                 case 1082: // date
                 case 1184: // timestamp with time zone
                     fields[index] = fostlib::coerce<fostlib::json>(
