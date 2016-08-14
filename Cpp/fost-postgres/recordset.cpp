@@ -135,6 +135,7 @@ namespace {
                 case 25: // text
                 case 1043: // varchar
                 case 1082: // date
+                case 1083: // time
                 case 1184: // timestamp with time zone
                     fields[index] = fostlib::coerce<fostlib::json>(
                         fostlib::utf8_string(pos[index].c_str()));

@@ -1,5 +1,5 @@
 2016-08-14  Kirit Saelensminde  <kirit@felspar.com>
- Added support for fetching varchar values.
+ Added support for fetching varchar and time values.
 
 2016-07-30  Kirit Saelensminde  <kirit@felspar.com>
  Stored procedures can now be called with JSON arguments.
