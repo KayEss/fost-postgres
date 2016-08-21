@@ -22,15 +22,6 @@ namespace fostlib {
         class recordset;
 
 
-//         /// Wraps a bound or partially bound stored procedure
-//         class bound_procedure {
-//         public:
-//             bound_procedure &operator () (const fostlib::string &);
-//
-//             recordset exec();
-//         };
-
-
         /// Wraps a stored procedure with no argument bindings
         class unbound_procedure {
             friend class connection;
@@ -39,8 +30,6 @@ namespace fostlib {
             unbound_procedure(connection &, std::string);
         public:
             const std::string name;
-
-//             bound_procedure &operator () (const fostlib::string &);
 
             recordset exec(const std::vector<fostlib::string> &args);
             recordset exec(const std::vector<fostlib::json> &args);

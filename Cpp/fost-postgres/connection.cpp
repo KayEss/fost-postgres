@@ -14,9 +14,45 @@
 #include <atomic>
 #include <fost/insert>
 #include <fost/log>
+#include <pqxx/nontransaction>
 
 
 const fostlib::module fostlib::pg::c_fost_pg(c_fost, "pg");
+
+
+namespace {
+
+
+    std::pair<fostlib::utf8_string, fostlib::json> dsn_from_json(const fostlib::json &conf) {
+        fostlib::utf8_string dsn;
+        fostlib::json effective;
+        for ( auto &key : {"host", "dbname", "user"} ) {
+            if ( conf.has_key(key) ) {
+                fostlib::insert(effective, key, conf[key]);
+                dsn += fostlib::utf8_string(key) + "='" +
+                    fostlib::coerce<fostlib::utf8_string>(
+                        fostlib::coerce<fostlib::string>(conf[key])) + "' ";
+            }
+        }
+        return std::make_pair(dsn, effective);
+    }
+
+
+}
+
+
+void fostlib::pg::createdb(const json &dsn, const string &dbname) {
+    pqxx::connection cnx(dsn_from_json(dsn).first.underlying());
+    pqxx::nontransaction tran(cnx);
+    tran.exec( "CREATE DATABASE \"" + coerce<utf8_string>(dbname).underlying() + "\"" );
+}
+
+
+void fostlib::pg::dropdb(const json &dsn, const string &dbname) {
+    pqxx::connection cnx(dsn_from_json(dsn).first.underlying());
+    pqxx::nontransaction tran(cnx);
+    tran.exec( "DROP DATABASE \"" + coerce<utf8_string>(dbname).underlying() + "\"" );
+}
 
 
 /*
@@ -33,23 +69,8 @@ fostlib::pg::connection::connection(const string &host)
 fostlib::pg::connection::connection(const string &host, const string &db)
 : pimpl(new impl(coerce<utf8_string>("host=" + host + " dbname=" + db))) {
 }
-namespace {
-    std::pair<fostlib::utf8_string, fostlib::json> from_json(const fostlib::json &conf) {
-        fostlib::utf8_string dsn;
-        fostlib::json effective;
-        for ( auto &key : {"host", "dbname", "user"} ) {
-            if ( conf.has_key(key) ) {
-                fostlib::insert(effective, key, conf[key]);
-                dsn += fostlib::utf8_string(key) + "='" +
-                    fostlib::coerce<fostlib::utf8_string>(
-                        fostlib::coerce<fostlib::string>(conf[key])) + "' ";
-            }
-        }
-        return std::make_pair(dsn, effective);
-    }
-}
 fostlib::pg::connection::connection(const json &conf)
-: pimpl(new impl(from_json(conf))) {
+: pimpl(new impl(dsn_from_json(conf))) {
 }
 
 

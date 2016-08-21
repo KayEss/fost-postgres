@@ -11,4 +11,5 @@
 
 #include <fost/pg/connection.hpp>
 #include <fost/pg/recordset.hpp>
+#include <fost/pg/stored-procedure.hpp>
 

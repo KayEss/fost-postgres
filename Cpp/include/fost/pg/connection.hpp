@@ -79,6 +79,13 @@ namespace fostlib {
         };
 
 
+        /// Create a database
+        void createdb(const json &dsn, const string &dbname);
+
+        /// Drop a database
+        void dropdb(const json &dsn, const string &dbname);
+
+
     }
 
 

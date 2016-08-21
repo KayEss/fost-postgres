@@ -1,3 +1,6 @@
+2016-08-21  Kirit Saelensminde  <kirit@felspar.com>
+ Add APIs for creating and deleting databases.
+
 2016-08-14  Kirit Saelensminde  <kirit@felspar.com>
  Added support for fetching varchar and time values.
 
