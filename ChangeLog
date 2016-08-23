@@ -1,3 +1,36 @@
+2016-08-21  Kirit Saelensminde  <kirit@felspar.com>
+ Add APIs for creating and deleting databases.
+
+2016-08-14  Kirit Saelensminde  <kirit@felspar.com>
+ Added support for fetching varchar and time values.
+
+2016-07-30  Kirit Saelensminde  <kirit@felspar.com>
+ Stored procedures can now be called with JSON arguments.
+
+2016-07-29  Kirit Saelensminde  <kirit@felspar.com>
+ Make the database connection move constructible.
+
+2016-07-16  Kirit Saelensminde  <kirit@felspar.com>
+ Add support for JSON objects in the SQL, on the assumption that they are for either json or jsonb in Postgres.
+
+2016-07-15  Kirit Saelensminde  <kirit@felspar.com>
+ Make use of table OIDs to distinguish names of columns.
+
+2016-06-11  Kirit Saelensminde  <kirit@felspar.com>
+ Warn about type OIDs that are unkown and completely disallow time stamps with time zone information.
+
+2016-05-29  Kirit Saelensminde  <kirit@felspar.com>
+ Allow JSON to be used in connection configuration and for the effective configuration to be retrieved.
+
+2016-03-24  Kirit Saelensminde  <kirit@felspar.com>
+ Add basic support for stored procedures.
+
+2016-02-28  Kirit Saelensminde  <kirit@felspar.com>
+ Add support for fetching the column names.
+
+2015-12-20  Kirit Saelensminde  <kirit@felspar.com>
+ Start to sketch out a new Postgres specific API which will eventually displace libpqxx.
+
 2014-09-07  Kirit Saelensminde  <kirit@felspar.com>
  Change the test database configuration to assume ident/trust based authentication.
 

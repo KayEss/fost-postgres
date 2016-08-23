@@ -5,9 +5,11 @@ fost-lib fost-postgres-test
         ../../../fost-base/External//uuid
         ../../../fost-base/Cpp/fost-test/
         ../../../fost-orm/Cpp/fost-schema/
+        ../fost-postgres/
         basic.cpp
         config.cpp
         table-creation.cpp
+        pg.cpp
     ;
 
 run ../../../fost-base/Cpp/fost-ftest//ftest
