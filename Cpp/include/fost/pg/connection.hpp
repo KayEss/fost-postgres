@@ -58,6 +58,9 @@ namespace fostlib {
             /// Commit the transaction
             void commit();
 
+            /// Configuration options
+            connection &zoneinfo(const fostlib::string &zi);
+
             /// Return a recordset range from the execution of the command
             recordset exec(const utf8_string &);
             /// Select statement intended for fetching individual row, or collections

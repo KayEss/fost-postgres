@@ -153,6 +153,12 @@ namespace {
 }
 
 
+fostlib::pg::connection &fostlib::pg::connection::zoneinfo(const string &zi) {
+    exec("SET TIME ZONE " + pimpl->trans->quote(zi.std_str()));
+    return *this;
+}
+
+
 fostlib::pg::recordset fostlib::pg::connection::select(const char *relation, const json &values) {
     string select = "SELECT * FROM ", where;
     select += relation;
