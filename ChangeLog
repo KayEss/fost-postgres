@@ -1,5 +1,6 @@
 2016-09-14  Kirit Saelensminde  <kirit@felspar.com>
- Add basic API that allows SELECT to be ordered.
+ * Add ability to set other settings on the database connection.
+ * Add basic API that allows SELECT to be ordered.
 
 2016-09-09  Kirit Saelensminde  <kirit@felspar.com>
  Add support for setting the zone info on the connection.
