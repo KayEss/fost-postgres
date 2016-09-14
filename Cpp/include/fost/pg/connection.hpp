@@ -65,6 +65,7 @@ namespace fostlib {
             recordset exec(const utf8_string &);
             /// Select statement intended for fetching individual row, or collections
             recordset select(const char *relation, const json &keys);
+            recordset select(const char *relation, const json &keys, const json &order);
             /// Perform a one row INSERT statement. Pass a JSON object that specifies
             /// the field names and values
             connection &insert(const char *relation, const json &values);
