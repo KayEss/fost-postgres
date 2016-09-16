@@ -84,14 +84,16 @@ fostlib::pg::recordset::const_iterator fostlib::pg::recordset::end() const {
 namespace {
     int64_t int_parser(const char *value) {
         int64_t ret{0};
-        if ( !boost::spirit::parse(value,
+        fostlib::parser_lock lock;
+        if ( !fostlib::parse(lock, value,
                 boost::spirit::int_parser<int64_t>()[phoenix::var(ret) = phoenix::arg1]).full )
             throw fostlib::exceptions::parse_error("Whilst parsing an int", value);
         return ret;
     }
     double float_parser(const char *value) {
         double ret{0};
-        if ( !boost::spirit::parse(value,
+        fostlib::parser_lock lock;
+        if ( !fostlib::parse(lock, value,
                 boost::spirit::real_parser<double>()[phoenix::var(ret) = phoenix::arg1]).full )
             throw fostlib::exceptions::parse_error("Whilst parsing a float", value);
         return ret;
