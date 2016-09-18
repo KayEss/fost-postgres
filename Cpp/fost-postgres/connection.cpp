@@ -159,8 +159,19 @@ fostlib::pg::connection &fostlib::pg::connection::zoneinfo(const string &zi) {
 }
 
 
+fostlib::pg::connection &fostlib::pg::connection::set_session(const string &n, const string &v) {
+    exec("SET " + n.std_str() + " = " + pimpl->trans->quote(v.std_str()));
+    return *this;
+}
+
+
 fostlib::pg::recordset fostlib::pg::connection::select(const char *relation, const json &values) {
-    string select = "SELECT * FROM ", where;
+    return select(relation, values, json::array_t());
+}
+fostlib::pg::recordset fostlib::pg::connection::select(
+    const char *relation, const json &values, const json &order
+) {
+    string select = "SELECT * FROM ", where, orderby;
     select += relation;
     for ( fostlib::json::const_iterator iter(values.begin()); iter != values.end(); ++iter ) {
         if ( where.empty() ) {
@@ -171,6 +182,16 @@ fostlib::pg::recordset fostlib::pg::connection::select(const char *relation, con
     }
     if ( not where.empty() ) {
         select += " WHERE " + where;
+    }
+    for ( const auto &ob : order ) {
+        if ( orderby.empty() ) {
+            orderby = " ORDER BY " + fostlib::coerce<fostlib::string>(ob);
+        } else {
+            orderby += ", " + fostlib::coerce<fostlib::string>(ob);
+        }
+    }
+    if ( not orderby.empty() ) {
+        select += orderby;
     }
     return exec(coerce<utf8_string>(select));
 }
