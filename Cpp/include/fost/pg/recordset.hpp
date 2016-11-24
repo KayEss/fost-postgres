@@ -57,6 +57,10 @@ namespace fostlib {
 
                 /// Compare for equality
                 bool operator == (const const_iterator &) const;
+                /// Compare for inequality
+                bool operator != (const const_iterator &ci) const {
+                    return not (*this == ci);
+                }
 
                 /// Dereference the iterator
                 const record *operator -> () const;
