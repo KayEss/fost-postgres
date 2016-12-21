@@ -26,7 +26,7 @@ namespace {
     std::pair<fostlib::utf8_string, fostlib::json> dsn_from_json(const fostlib::json &conf) {
         fostlib::utf8_string dsn;
         fostlib::json effective;
-        for ( auto &key : {"host", "dbname", "user"} ) {
+        for ( auto &key : {"host", "dbname", "password", "user"} ) {
             if ( conf.has_key(key) ) {
                 fostlib::insert(effective, key, conf[key]);
                 dsn += fostlib::utf8_string(key) + "='" +

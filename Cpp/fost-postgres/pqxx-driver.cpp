@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2015, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -9,6 +9,7 @@
 #include <fost/db-driver-sql>
 #include <fost/exception/transaction_fault.hpp>
 #include <fost/exception/unexpected_eof.hpp>
+#include <fost/insert>
 
 #include <pqxx/connection>
 #include <pqxx/nontransaction>
@@ -120,7 +121,7 @@ namespace {
                     throw fostlib::exceptions::unexpected_eof( L"Recordset is at EOF" );
 
                 pqxx::row::size_type n( i );
-                if ( m_fields[ n ].isnull() ) {
+                if ( not m_fields[ n ] ) {
                     if ( m_position.at( n ).is_null() )
                         m_fields[ n ] = fostlib::json();
                     else
@@ -141,7 +142,7 @@ namespace {
                     fostlib::coerce< fostlib::utf8_string >( name ).underlying()
                 ) );
             } catch ( fostlib::exceptions::exception &e ) {
-                e.info() << L"Whilst fetching column named: " << name << std::endl;
+                fostlib::insert(e.data(), "field", name);
                 throw;
             }
         }

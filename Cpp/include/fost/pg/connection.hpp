@@ -43,7 +43,8 @@ namespace fostlib {
             /// Supported items are:
             /// 1. dbname -- Name of the database
             /// 2. host -- The host (or path when starting with /)
-            /// 3. user -- The username
+            /// 3. password -- Connection password to use
+            /// 4. user -- The username
             connection(const json &);
 
             /// Move constructor
