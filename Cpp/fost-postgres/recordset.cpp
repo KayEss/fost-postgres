@@ -1,5 +1,5 @@
 /*
-    Copyright 2015-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2015-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -82,21 +82,29 @@ fostlib::pg::recordset::const_iterator fostlib::pg::recordset::end() const {
 
 
 namespace {
-    int64_t int_parser(const char *value) {
+    int64_t int_parser(const std::string &value) {
         int64_t ret{0};
         fostlib::parser_lock lock;
-        if ( !fostlib::parse(lock, value,
-                boost::spirit::int_parser<int64_t>()[phoenix::var(ret) = phoenix::arg1]).full )
+        auto pos = value.begin();
+        if ( not boost::spirit::qi::parse(pos, value.end(),
+                boost::spirit::qi::int_parser<int64_t>(), ret) && pos == value.end() )
+        {
             throw fostlib::exceptions::parse_error("Whilst parsing an int", value);
-        return ret;
+        } else {
+            return ret;
+        }
     }
-    double float_parser(const char *value) {
+    double float_parser(const std::string &value) {
         double ret{0};
         fostlib::parser_lock lock;
-        if ( !fostlib::parse(lock, value,
-                boost::spirit::real_parser<double>()[phoenix::var(ret) = phoenix::arg1]).full )
-            throw fostlib::exceptions::parse_error("Whilst parsing a float", value);
-        return ret;
+        auto pos = value.begin();
+        if ( not boost::spirit::qi::parse(pos, value.end(),
+                boost::spirit::qi::double_, ret) && pos == value.end() )
+        {
+            throw fostlib::exceptions::parse_error("Whilst parsing a double", value);
+        } else {
+            return ret;
+        }
     }
 
     void fillin(
@@ -139,8 +147,7 @@ namespace {
                 case 1082: // date
                 case 1083: // time
                 case 1184: // timestamp with time zone
-                    fields[index] = fostlib::coerce<fostlib::json>(
-                        fostlib::utf8_string(pos[index].c_str()));
+                    fields[index] = fostlib::coerce<fostlib::json>(pos[index].c_str());
                 }
             }
         }
