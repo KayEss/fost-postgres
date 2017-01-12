@@ -84,7 +84,6 @@ fostlib::pg::recordset::const_iterator fostlib::pg::recordset::end() const {
 namespace {
     int64_t int_parser(const std::string &value) {
         int64_t ret{0};
-        fostlib::parser_lock lock;
         auto pos = value.begin();
         if ( not boost::spirit::qi::parse(pos, value.end(),
                 boost::spirit::qi::int_parser<int64_t>(), ret) && pos == value.end() )
@@ -96,7 +95,6 @@ namespace {
     }
     double float_parser(const std::string &value) {
         double ret{0};
-        fostlib::parser_lock lock;
         auto pos = value.begin();
         if ( not boost::spirit::qi::parse(pos, value.end(),
                 boost::spirit::qi::double_, ret) && pos == value.end() )

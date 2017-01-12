@@ -1,3 +1,6 @@
+2017-01-12  Kirit Saelensminde  <kirit@felspar.com>
+ Removed the old `parser_lock` which is no longer needed.
+
 2017-01-03  Kirit Saelensminde  <kirit@felspar.com>
  Switch to the new version of Boost Spirit. Drop support for Boost version prior to !.59.
 
