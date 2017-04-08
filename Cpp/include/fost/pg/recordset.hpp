@@ -1,5 +1,5 @@
 /*
-    Copyright 2015-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2015-2017, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -43,7 +43,9 @@ namespace fostlib {
             std::vector<fostlib::nullable<fostlib::string>> columns() const;
 
             /// The recordset iterator
-            class const_iterator {
+            class const_iterator :
+                public std::iterator<std::input_iterator_tag, record>
+            {
                 struct impl;
                 std::unique_ptr<impl> pimpl;
                 const_iterator(recordset::impl&, bool);
@@ -67,8 +69,13 @@ namespace fostlib {
                 /// Dereference the iterator
                 const record &operator * () const;
 
+                /// Make assignable
+                const_iterator &operator = (const const_iterator &);
+
                 /// Move to the next row
                 const_iterator &operator ++ ();
+                /// Move to the next row
+                const_iterator operator ++ (int);
 
                 friend class recordset;
             };

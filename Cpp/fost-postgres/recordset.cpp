@@ -172,6 +172,15 @@ fostlib::pg::recordset::const_iterator::const_iterator(recordset::impl &rs, bool
 fostlib::pg::recordset::const_iterator::~const_iterator() = default;
 
 
+fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::operator = (
+    const fostlib::pg::recordset::const_iterator &other
+) {
+    pimpl.reset(new impl(other.pimpl->rs, other.pimpl->position, other.pimpl->row.size()));
+    pimpl->row = other.pimpl->row;
+    return *this;
+}
+
+
 bool fostlib::pg::recordset::const_iterator::operator == (const const_iterator &other) const {
     if ( pimpl && other.pimpl ) {
         return pimpl->position == other.pimpl->position;
@@ -194,5 +203,10 @@ fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::
         fillin(pimpl->rs->types, pimpl->position, pimpl->row.fields);
     }
     return *this;
+}
+fostlib::pg::recordset::const_iterator fostlib::pg::recordset::const_iterator::operator ++ (int) {
+    auto result = *this;
+    this->operator ++ ();
+    return result;
 }
 
