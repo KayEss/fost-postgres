@@ -8,7 +8,7 @@ lib libpq : : <name>pq ;
 lib fost-pqxx
     :
         libpq
-        [ path.glob $(TOP)/../PostgreSQL/libpqxx/src/ : *.cxx ]
+        [ path.glob $(TOP)/../PostgreSQL/pqxx/src/ : *.cxx ]
     :
         <define>PQXX_HAVE_BOOST_SMART_PTR
         <define>PQXXTR1=boost
