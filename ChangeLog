@@ -1,3 +1,6 @@
+2017-04-28  Kirit Saelensminde  <kirit@felspar.com>
+ Make it possible to iterate over the columns in the row.
+
 2017-04-12  Kirit Saelensminde  <kirit@felspar.com>
  Change libpqxx paths for latest code.
 

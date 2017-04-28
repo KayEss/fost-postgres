@@ -107,6 +107,11 @@ namespace fostlib {
             }
 
             friend class recordset::const_iterator;
+
+            /// Use the vector iterator
+            using const_iterator = std::vector<json>::const_iterator;
+            const_iterator begin() const { return fields.begin(); }
+            const_iterator end() const { return fields.end(); }
         };
 
 
