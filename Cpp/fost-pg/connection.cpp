@@ -7,4 +7,22 @@
 
 
 #include <fost/pg/connection.hpp>
+#include <fost/pg/recordset.hpp>
+
+
+struct fostlib::pg::connection::impl {
+};
+
+
+fostlib::pg::connection::connection()
+: pimpl(new impl) {
+}
+
+
+fostlib::pg::connection::~connection() = default;
+
+
+fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
+    throw exceptions::not_implemented(__func__);
+}
 

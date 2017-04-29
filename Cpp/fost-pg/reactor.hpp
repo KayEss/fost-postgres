@@ -6,15 +6,3 @@
 */
 
 
-#include <fost/postgres>
-#include <fost/test>
-
-
-FSL_TEST_SUITE(select);
-
-
-FSL_TEST_FUNCTION(basic) {
-    fostlib::pg::connection cnx;
-    auto rs = cnx.exec("SELECT 1");
-}
-

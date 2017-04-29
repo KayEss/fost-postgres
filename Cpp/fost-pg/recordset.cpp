@@ -6,15 +6,12 @@
 */
 
 
-#include <fost/postgres>
-#include <fost/test>
+#include <fost/pg/recordset.hpp>
 
 
-FSL_TEST_SUITE(select);
+struct fostlib::pg::recordset::impl {
+};
 
 
-FSL_TEST_FUNCTION(basic) {
-    fostlib::pg::connection cnx;
-    auto rs = cnx.exec("SELECT 1");
-}
+fostlib::pg::recordset::~recordset() = default;
 
