@@ -52,8 +52,19 @@ namespace fostlib {
                 }
             }
 
+            command &write(const char *);
+
             /// Send the command to the server
             void send(boost::asio::local::stream_protocol::socket &, boost::asio::yield_context &);
+        };
+
+
+        struct response {
+            response(char code);
+            response(response &&) = default;
+
+            char code;
+            std::unique_ptr<boost::asio::streambuf> body;
         };
 
 
@@ -61,6 +72,8 @@ namespace fostlib {
             impl(boost::asio::io_service &, f5::lstring, boost::asio::yield_context &);
 
             boost::asio::local::stream_protocol::socket socket;
+
+            response read(boost::asio::yield_context &);
         };
 
 
