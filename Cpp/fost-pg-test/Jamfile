@@ -1,0 +1,20 @@
+using testing ;
+
+fost-lib fost-pg-test
+    :
+        ../../../fost-base/Cpp/fost-test/
+        ../fost-pg/
+        select.cpp
+    ;
+
+run ../../../fost-base/Cpp/fost-ftest//ftest
+    :
+        -v true
+    :
+        ../fost-pg//fost-pg
+        fost-pg-test
+    :
+    :
+        fost-pg-test-run
+    ;
+

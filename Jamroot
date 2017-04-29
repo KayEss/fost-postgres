@@ -23,6 +23,7 @@ fost-project fost-postgres :
 alias fost :
         ../fost-base//fost
         ../fost-orm//fost
+        Cpp/fost-pg
         Cpp/fost-postgres
         Cpp/fost-pqxx
     ;
@@ -30,6 +31,7 @@ alias fost :
 alias tests :
         ../fost-base//tests
         ../fost-orm//tests
+        Cpp/fost-pg-test
         Cpp/fost-postgres-test
     ;
 explicit tests ;

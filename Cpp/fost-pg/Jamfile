@@ -1,0 +1,6 @@
+
+fost-lib-autotest fost-pg
+    : Cpp/fost-pg
+    :
+    ;
+
