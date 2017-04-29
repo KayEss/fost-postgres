@@ -6,3 +6,16 @@
 */
 
 
+#include <f5/threading/boost-asio.hpp>
+
+
+namespace fostlib {
+    namespace pg {
+
+
+        f5::boost_asio::reactor_pool &reactor();
+
+
+    }
+}
+

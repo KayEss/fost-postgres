@@ -6,3 +6,11 @@
 */
 
 
+#include "reactor.hpp"
+
+
+f5::boost_asio::reactor_pool &fostlib::pg::reactor() {
+    static f5::boost_asio::reactor_pool r;
+    return r;
+}
+
