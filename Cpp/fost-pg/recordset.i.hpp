@@ -6,14 +6,21 @@
 */
 
 
-#include <fost/pg/recordset.hpp>
-#include "recordset.i.hpp"
+#pragma once
+
+#include "connection.i.hpp"
 
 
-fostlib::pg::recordset::recordset(std::unique_ptr<impl> &&p)
-: pimpl(std::move(p)) {
+namespace fostlib {
+    namespace pg {
+
+
+        struct recordset::impl {
+            response row_description;
+            response next_data_row;;
+        };
+
+
+    }
 }
-
-
-fostlib::pg::recordset::~recordset() = default;
 

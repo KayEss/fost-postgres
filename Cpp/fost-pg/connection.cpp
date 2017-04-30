@@ -14,6 +14,7 @@
 #include <fost/pg/recordset.hpp>
 #include "connection.i.hpp"
 #include "reactor.hpp"
+#include "recordset.i.hpp"
 
 #include <boost/asio/read.hpp>
 #include <boost/asio/write.hpp>
@@ -42,16 +43,25 @@ fostlib::pg::connection::~connection() = default;
 
 fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
     f5::sync s;
+    auto rs = std::make_unique<recordset::impl>();
     boost::asio::spawn(pimpl->socket.get_io_service(), s([&](auto yield) {
         command query{'Q'};
         query.write(sql.underlying().c_str());
         query.send(pimpl->socket, yield);
-        throw exceptions::not_implemented(__func__);
-        auto reply{pimpl->read(yield)};
-        throw exceptions::not_implemented(std::to_string(reply.code));
+        while ( true ) {
+            auto reply{pimpl->read(yield)};
+            if ( reply.type == 'D' ) {
+                rs->next_data_row = std::move(reply);
+                return;
+            } else if ( reply.type == 'T' ) {
+                rs->row_description = std::move(reply);
+            } else {
+                throw exceptions::not_implemented(__func__, reply.code());
+            }
+        }
     }));
     s.wait();
-    throw exceptions::not_implemented(__func__);
+    return recordset(std::move(rs));
 }
 
 

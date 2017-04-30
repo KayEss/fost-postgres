@@ -6,6 +6,8 @@
 */
 
 
+#pragma once
+
 #include <fost/unicode>
 
 #include <boost/asio/local/stream_protocol.hpp>
@@ -66,6 +68,9 @@ namespace fostlib {
             std::vector<unsigned char> body;
             array_view<unsigned char> buffer;
 
+            response()
+            : type{} {
+            }
             response(char code, std::size_t size);
 
             utf::u8_view code() const {
