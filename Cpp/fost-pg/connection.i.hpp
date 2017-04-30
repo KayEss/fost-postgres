@@ -6,6 +6,8 @@
 */
 
 
+#include <fost/unicode>
+
 #include <boost/asio/local/stream_protocol.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/streambuf.hpp>
@@ -60,11 +62,50 @@ namespace fostlib {
 
 
         struct response {
-            response(char code);
-            response(response &&) = default;
+            char type;
+            std::vector<unsigned char> body;
+            array_view<unsigned char> buffer;
 
-            char code;
-            std::unique_ptr<boost::asio::streambuf> body;
+            response(char code, std::size_t size);
+
+            utf::u8_view code() const {
+                return array_view<unsigned char>(
+                    reinterpret_cast<const unsigned char *>(&type), 1);
+            }
+            unsigned char *data() {
+                return body.data();
+            }
+            std::size_t size() {
+                return body.size();
+            }
+            std::size_t remaining() {
+                return buffer.size();
+            }
+
+            unsigned char read_byte() {
+                if ( not buffer.size() ) throw exceptions::not_implemented(__func__);
+                const auto byte = buffer[0];
+                buffer = buffer.slice(1);
+                return byte;
+            }
+
+            uint16_t read_int16() {
+                return read_byte() * -0x1'00u + read_byte();
+            }
+            uint32_t read_int32() {
+                return read_byte() * 0x1'00'00'00u +
+                    read_byte() * 0x1'00'00u + read_byte() * -0x1'00u + read_byte();
+            }
+
+            utf::u8_view read_u8_view() {
+                if ( not buffer.size() ) throw exceptions::not_implemented(__func__);
+                auto start = buffer;
+                while ( read_byte() != 0 );
+                return array_view<unsigned char>(start.data(), buffer.data() - start.data() - 1);
+            }
+            string read_string() {
+                return read_u8_view();
+            }
         };
 
 

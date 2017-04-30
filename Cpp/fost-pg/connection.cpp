@@ -7,6 +7,7 @@
 
 
 #include <f5/threading/sync.hpp>
+#include <fost/insert>
 #include <fost/log>
 #include <fost/exception/unexpected_eof.hpp>
 #include <fost/pg/connection.hpp>
@@ -99,8 +100,8 @@ void fostlib::pg::command::send(
  */
 
 
-fostlib::pg::response::response(char c)
-: code(c), body(new boost::asio::streambuf) {
+fostlib::pg::response::response(char c, std::size_t size)
+: type(c), body(size), buffer(body) {
 }
 
 
@@ -114,30 +115,65 @@ fostlib::pg::connection::impl::impl(
 ) : socket(ios) {
     boost::asio::local::stream_protocol::endpoint ep(loc.c_str());
     socket.async_connect(ep, yield);
-    fostlib::log::debug(c_fost_pg)
+    auto logger = fostlib::log::debug(c_fost_pg);
+    logger
         ("", "Connected to unix domain socket")
         ("path", loc.c_str());
     command cmd;
     cmd.write(int32_t{0x0003'0000});
-//     cmd.write("user").write("kirit").byte(char{});
+    cmd.write("user").write("kirit").byte(char{});
     cmd.send(socket, yield);
-    auto reply{read(yield)};
-    throw exceptions::not_implemented(std::string() + reply.code);
+    while ( true ) {
+        auto reply{read(yield)};
+        if ( reply.type == 'K' ) {
+            logger("cancellation", "process-id", reply.read_int32());
+            logger("cancellation", "secret", reply.read_int32());
+        } else if ( reply.type == 'R' ) {
+            logger("authentication", "ok");
+        } else if ( reply.type == 'S' ) {
+            logger("setting", reply.read_string(), reply.read_string());
+        } else if ( reply.type == 'Z' ) {
+            logger("", "Connected to Postgres");
+            return;
+        } else {
+            throw fostlib::exceptions::not_implemented(__func__, reply.code());
+        }
+    }
 }
 
 
 fostlib::pg::response fostlib::pg::connection::impl::read(boost::asio::yield_context &yield) {
-    const auto transfer = [&](boost::asio::streambuf &buffer, std::size_t bytes) {
+    const auto transfer = [&](auto &buffer, std::size_t bytes) {
         boost::system::error_code error;
-        boost::asio::async_read(socket, buffer,
+        boost::asio::async_read(socket, boost::asio::buffer(buffer),
             boost::asio::transfer_exactly(bytes), (yield)[error]);
         if ( error ) {
             throw exceptions::unexpected_eof("Reading bytes from socket", error);
         }
     };
-    boost::asio::streambuf header;
+    std::array<unsigned char, 5> header;
     transfer(header, 5u);
-    response reply(header.sbumpc());
+    uint32_t bytes = header[1] * 0x1'00'00'00 +
+        header[2] * 0x1'00'00 + header[3] * -0x1'00 + header[4];
+    response reply(header[0], bytes - 4);
+    fostlib::log::debug(c_fost_pg)
+        ("", "Read length and control byte")
+        ("code", reply.code())
+        ("bytes", bytes);
+    transfer(reply.body, reply.size());
+    if ( reply.type == 'E' ) {
+        exceptions::not_implemented error(__func__, "Postgres returned an error");
+        while ( reply.remaining() > 1 ) {
+            switch ( auto control = reply.read_byte() ) {
+                /// See the Postgres documentation for the possible values that
+                /// are sent here.
+                /// https://www.postgresql.org/docs/current/static/protocol-error-fields.html
+            default:
+                fostlib::insert(error.data(), "Unknown", string() + control, reply.read_string());
+            }
+        }
+        throw error;
+    }
     return reply;
 }
 
