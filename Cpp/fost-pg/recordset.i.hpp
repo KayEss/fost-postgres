@@ -33,7 +33,11 @@ namespace fostlib {
 
 
         struct recordset::const_iterator::impl {
+            recordset::impl &rsp;
             response data_row;
+            record data;
+
+            std::size_t decode_row();
         };
 
 

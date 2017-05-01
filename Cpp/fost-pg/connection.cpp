@@ -115,6 +115,9 @@ fostlib::pg::response::response(char c, std::size_t size)
 }
 
 
+fostlib::pg::response::~response() = default;
+
+
 /*
  * fostlib::pg::connection::impl
  */
@@ -163,13 +166,14 @@ fostlib::pg::response fostlib::pg::connection::impl::read(boost::asio::yield_con
     };
     std::array<unsigned char, 5> header;
     transfer(header, 5u);
-    uint32_t bytes = header[1] * 0x1'00'00'00 +
-        header[2] * 0x1'00'00 + header[3] * -0x1'00 + header[4];
-    response reply(header[0], bytes - 4);
+    uint32_t bytes = (header[1] << 24) +
+        (header[2] << 16) + (header[3] << 8) + header[4];
     fostlib::log::debug(c_fost_pg)
         ("", "Read length and control byte")
-        ("code", reply.code())
-        ("bytes", bytes);
+        ("code", string() + header[0])
+        ("bytes", bytes)
+        ("body", bytes - 4);;
+    response reply(header[0], bytes - 4);
     transfer(reply.body, reply.size());
     if ( reply.type == 'E' ) {
         exceptions::not_implemented error(__func__, "Postgres returned an error");

@@ -73,6 +73,14 @@ namespace fostlib {
             }
             response(char code, std::size_t size);
 
+            ~response();
+
+            /// Make movable only
+            response(const response &) = delete;
+            response &operator = (const response &) = delete;
+            response(response &&) = default;
+            response &operator = (response &&) = default;
+
             utf::u8_view code() const {
                 return array_view<unsigned char>(
                     reinterpret_cast<const unsigned char *>(&type), 1);
@@ -95,13 +103,19 @@ namespace fostlib {
             }
 
             int16_t read_int16() {
-                return read_byte() * -0x1'00u + read_byte();
+                return (read_byte() << 8) + read_byte();
             }
             int32_t read_int32() {
-                return read_byte() * 0x1'00'00'00u +
-                    read_byte() * 0x1'00'00u + read_byte() * -0x1'00u + read_byte();
+                return (read_byte() << 24) + (read_byte() << 16)
+                    + (read_byte() << 8) + read_byte();
             }
 
+            utf::u8_view read_u8_view(std::size_t bytes) {
+                if ( buffer.size() < bytes ) throw exceptions::not_implemented(__func__);
+                auto ret = buffer.slice(0, bytes);
+                buffer = buffer.slice(bytes);
+                return ret;
+            }
             utf::u8_view read_u8_view() {
                 if ( not buffer.size() ) throw exceptions::not_implemented(__func__);
                 auto start = buffer;

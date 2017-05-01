@@ -6,6 +6,10 @@
 */
 
 
+#include <fost/insert>
+#include <fost/log>
+#include <fost/parse/parse.hpp>
+#include <fost/exception/parse_error.hpp>
 #include <fost/pg/recordset.hpp>
 #include "recordset.i.hpp"
 
@@ -70,8 +74,10 @@ std::size_t fostlib::pg::recordset::impl::row_description(response description) 
 
 fostlib::pg::recordset::const_iterator::const_iterator(fostlib::pg::recordset::impl &rs, bool begin) {
     if ( rs.first_data_row ) {
-        pimpl.reset(new impl{std::move(rs.first_data_row.value())});
+        pimpl.reset(new impl{rs, std::move(rs.first_data_row.value()),
+            record{rs.column_names.size()}});
         rs.first_data_row = null;
+        pimpl->decode_row();
     } else {
         throw exceptions::not_implemented("This recordset has already been iterated over");
     }
@@ -79,3 +85,85 @@ fostlib::pg::recordset::const_iterator::const_iterator(fostlib::pg::recordset::i
 
 
 fostlib::pg::recordset::const_iterator::~const_iterator() = default;
+
+
+const fostlib::pg::record &fostlib::pg::recordset::const_iterator::operator * () const {
+    return pimpl->data;
+}
+
+
+/*
+ * fostlib::pg::recordset::const_iterator::impl
+ */
+
+
+namespace {
+    inline int64_t int_parser(fostlib::utf::u8_view value) {
+        int64_t ret{};
+        auto pos = value.begin();
+        if ( not boost::spirit::qi::parse(pos, value.end(),
+                boost::spirit::qi::int_parser<int64_t>(), ret) && pos == value.end() )
+        {
+            throw fostlib::exceptions::parse_error("Whilst parsing an int", value);
+        } else {
+            return ret;
+        }
+    }
+//     inline double float_parser(fostlib::utf::u8_view value) {
+//         double ret{0};
+//         auto pos = value.begin();
+//         if ( not boost::spirit::qi::parse(pos, value.end(),
+//                 boost::spirit::qi::double_, ret) && pos == value.end() )
+//         {
+//             throw fostlib::exceptions::parse_error("Whilst parsing a double", value);
+//         } else {
+//             return ret;
+//         }
+//     }
+}
+
+
+std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
+    const auto cols = data_row.read_int16();
+    if ( cols != rsp.column_meta.size() ) {
+        exceptions::not_implemented error(__func__, "Mismatch of column counts");
+        insert(error.data(), "expected", rsp.column_meta.size());
+        insert(error.data(), "got", cols);
+        throw error;
+    }
+    data.fields.clear();
+    while ( data_row.remaining() ) {
+        const auto bytes = data_row.read_int32();
+        if ( rsp.column_meta[data.size()].format_code == 0 ) {
+            const auto str = data_row.read_u8_view(bytes);
+            switch ( rsp.column_meta[data.size()].field_type_oid ) {
+            case 23: // int32
+                data.fields.push_back(json(int_parser(str)));
+                break;
+            default:
+                fostlib::log::warning(c_fost_pg)
+                    ("", "Column value")
+                    ("name", rsp.column_names[data.size()])
+                    ("field_type_oid", rsp.column_meta[data.size()].field_type_oid)
+                    ("type_modifier", rsp.column_meta[data.size()].type_modifier)
+                    ("format_code", rsp.column_meta[data.size()].format_code)
+                    ("bytes", bytes);
+                data.fields.push_back(json(string(str)));
+            }
+        } else {
+            throw exceptions::not_implemented(__func__, "Binary format");
+        }
+    }
+    return cols;
+}
+
+
+/*
+ * fostlib::pg::record
+ */
+
+
+fostlib::pg::record::record(std::size_t cols) {
+    fields.reserve(cols);
+}
+
