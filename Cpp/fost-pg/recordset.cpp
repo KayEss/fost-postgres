@@ -6,6 +6,7 @@
 */
 
 
+#include <f5/threading/sync.hpp>
 #include <fost/insert>
 #include <fost/log>
 #include <fost/parse/parse.hpp>
@@ -34,6 +35,11 @@ std::vector<fostlib::nullable<fostlib::string>> fostlib::pg::recordset::columns(
 
 fostlib::pg::recordset::const_iterator fostlib::pg::recordset::begin() const {
     return const_iterator(*pimpl, true);
+}
+
+
+fostlib::pg::recordset::const_iterator fostlib::pg::recordset::end() const {
+    return const_iterator(*pimpl, false);
 }
 
 
@@ -73,15 +79,18 @@ std::size_t fostlib::pg::recordset::impl::row_description(response description) 
 
 
 fostlib::pg::recordset::const_iterator::const_iterator(fostlib::pg::recordset::impl &rs, bool begin) {
-    if ( rs.first_data_row ) {
+    if ( begin && rs.first_data_row ) {
         pimpl.reset(new impl{rs, std::move(rs.first_data_row.value()),
-            record{rs.column_names.size()}});
+            record{rs.column_names.size()}, false, 1u});
         rs.first_data_row = null;
         pimpl->decode_row();
+    } else if ( not begin ) {
+        pimpl.reset(new impl{rs, response(), record{0}, true, 0u});
     } else {
         throw exceptions::not_implemented("This recordset has already been iterated over");
     }
 }
+
 
 
 fostlib::pg::recordset::const_iterator::~const_iterator() = default;
@@ -89,6 +98,22 @@ fostlib::pg::recordset::const_iterator::~const_iterator() = default;
 
 const fostlib::pg::record &fostlib::pg::recordset::const_iterator::operator * () const {
     return pimpl->data;
+}
+
+
+fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::operator ++ () {
+    f5::sync s;
+    boost::asio::spawn(pimpl->rsp.cnx.socket.get_io_service(), s([&](auto yield) {
+        pimpl->next_record(yield);
+    }));
+    s.wait();
+    return *this;
+}
+
+
+bool fostlib::pg::recordset::const_iterator::operator == (const const_iterator &r) const {
+    return &pimpl->rsp == &r.pimpl->rsp &&
+        ((pimpl->finished && r.pimpl->finished) || pimpl->row_number == r.pimpl->row_number);
 }
 
 
@@ -155,6 +180,23 @@ std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
         }
     }
     return cols;
+}
+
+
+bool fostlib::pg::recordset::const_iterator::impl::next_record(boost::asio::yield_context &yield) {
+    while ( true ) {
+        auto reply{rsp.cnx.read(yield)};
+        if ( reply.type == 'C' ) {
+            fostlib::log::debug(c_fost_pg)
+                ("", "Command close")
+                ("message", reply.read_string());
+        } else if ( reply.type == 'Z' ) {
+            finished = true;
+            return finished;
+        } else {
+            throw exceptions::not_implemented(__func__, reply.code());
+        }
+    }
 }
 
 

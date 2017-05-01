@@ -16,6 +16,12 @@ namespace fostlib {
 
 
         struct recordset::impl {
+            connection::impl &cnx;
+
+            impl(connection::impl &c)
+            : cnx(c) {
+            }
+
             std::vector<fostlib::nullable<fostlib::string>> column_names;
             struct cmeta {
                 int32_t table_oid;
@@ -37,7 +43,11 @@ namespace fostlib {
             response data_row;
             record data;
 
+            bool finished;
+            std::size_t row_number;
+
             std::size_t decode_row();
+            bool next_record(boost::asio::yield_context &);
         };
 
 

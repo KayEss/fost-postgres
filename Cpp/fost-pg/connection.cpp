@@ -43,7 +43,7 @@ fostlib::pg::connection::~connection() = default;
 
 fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
     f5::sync s;
-    auto rs = std::make_unique<recordset::impl>();
+    auto rs = std::make_unique<recordset::impl>(*pimpl);
     boost::asio::spawn(pimpl->socket.get_io_service(), s([&](auto yield) {
         command query{'Q'};
         query.write(sql.underlying().c_str());

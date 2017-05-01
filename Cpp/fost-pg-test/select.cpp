@@ -25,5 +25,8 @@ FSL_TEST_FUNCTION(basic) {
     auto row = *pos;
     FSL_CHECK_EQ(row.size(), 2u);
     FSL_CHECK_EQ(row[0], fostlib::json(1));
+    FSL_CHECK_EQ(row[1], fostlib::json(2));
+    ++pos;
+    FSL_CHECK(pos == rs.end());
 }
 
