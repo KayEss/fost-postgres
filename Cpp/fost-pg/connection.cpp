@@ -51,10 +51,10 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
         while ( true ) {
             auto reply{pimpl->read(yield)};
             if ( reply.type == 'D' ) {
-                rs->next_data_row = std::move(reply);
+                rs->first_data_row = std::move(reply);
                 return;
             } else if ( reply.type == 'T' ) {
-                rs->row_description = std::move(reply);
+                rs->row_description(std::move(reply));
             } else {
                 throw exceptions::not_implemented(__func__, reply.code());
             }

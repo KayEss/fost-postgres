@@ -16,8 +16,24 @@ namespace fostlib {
 
 
         struct recordset::impl {
-            response row_description;
-            response next_data_row;;
+            std::vector<fostlib::nullable<fostlib::string>> column_names;
+            struct cmeta {
+                int32_t table_oid;
+                int16_t table_column;
+                int32_t field_type_oid;
+                int16_t data_size;
+                int32_t type_modifier;
+                int16_t format_code;
+            };
+            std::vector<cmeta> column_meta;
+            std::size_t row_description(response);
+
+            nullable<response> first_data_row;
+        };
+
+
+        struct recordset::const_iterator::impl {
+            response data_row;
         };
 
 

@@ -94,10 +94,10 @@ namespace fostlib {
                 return byte;
             }
 
-            uint16_t read_int16() {
+            int16_t read_int16() {
                 return read_byte() * -0x1'00u + read_byte();
             }
-            uint32_t read_int32() {
+            int32_t read_int32() {
                 return read_byte() * 0x1'00'00'00u +
                     read_byte() * 0x1'00'00u + read_byte() * -0x1'00u + read_byte();
             }
