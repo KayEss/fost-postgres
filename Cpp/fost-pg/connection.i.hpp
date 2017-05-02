@@ -64,34 +64,9 @@ namespace fostlib {
         };
 
 
-        struct response {
-            char type;
-            std::vector<unsigned char> body;
+        struct decoder {
             array_view<unsigned char> buffer;
 
-            response()
-            : type{} {
-            }
-            response(char code, std::size_t size);
-
-            ~response();
-
-            /// Make movable only
-            response(const response &) = delete;
-            response &operator = (const response &) = delete;
-            response(response &&) = default;
-            response &operator = (response &&) = default;
-
-            utf::u8_view code() const {
-                return array_view<unsigned char>(
-                    reinterpret_cast<const unsigned char *>(&type), 1);
-            }
-            unsigned char *data() {
-                return body.data();
-            }
-            std::size_t size() {
-                return body.size();
-            }
             std::size_t remaining() {
                 return buffer.size();
             }
@@ -128,6 +103,40 @@ namespace fostlib {
             }
             string read_string() {
                 return read_u8_view();
+            }
+        };
+
+
+        struct response {
+            char type;
+            std::vector<unsigned char> body;
+
+            response()
+            : type{} {
+            }
+            response(char code, std::size_t size);
+
+            ~response();
+
+            /// Make movable only
+            response(const response &) = delete;
+            response &operator = (const response &) = delete;
+            response(response &&) = default;
+            response &operator = (response &&) = default;
+
+            utf::u8_view code() const {
+                return array_view<unsigned char>(
+                    reinterpret_cast<const unsigned char *>(&type), 1);
+            }
+            unsigned char *data() {
+                return body.data();
+            }
+            std::size_t size() {
+                return body.size();
+            }
+
+            operator decoder () const {
+                return decoder{body};
             }
         };
 

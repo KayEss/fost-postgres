@@ -133,7 +133,7 @@ void fostlib::pg::command::send(
 
 
 fostlib::pg::response::response(char c, std::size_t size)
-: type(c), body(size), buffer(body) {
+: type(c), body(size) {
 }
 
 
@@ -170,13 +170,14 @@ fostlib::pg::connection::impl::impl(
     cmd.send(socket, yield);
     while ( true ) {
         auto reply{read(yield)};
+        decoder decode(reply);
         if ( reply.type == 'K' ) {
-            logger("cancellation", "process-id", reply.read_int32());
-            logger("cancellation", "secret", reply.read_int32());
+            logger("cancellation", "process-id", decode.read_int32());
+            logger("cancellation", "secret", decode.read_int32());
         } else if ( reply.type == 'R' ) {
             logger("authentication", "ok");
         } else if ( reply.type == 'S' ) {
-            logger("setting", reply.read_string(), reply.read_string());
+            logger("setting", decode.read_string(), decode.read_string());
         } else if ( reply.type == 'Z' ) {
             logger("", "Connected to Postgres");
             return;
@@ -209,13 +210,14 @@ fostlib::pg::response fostlib::pg::connection::impl::read(boost::asio::yield_con
     transfer(reply.body, reply.size());
     if ( reply.type == 'E' ) {
         exceptions::not_implemented error(__func__, "Postgres returned an error");
-        while ( reply.remaining() > 1 ) {
-            switch ( auto control = reply.read_byte() ) {
+        decoder decode(reply);
+        while ( decode.remaining() > 1 ) {
+            switch ( auto control = decode.read_byte() ) {
                 /// See the Postgres documentation for the possible values that
                 /// are sent here.
                 /// https://www.postgresql.org/docs/current/static/protocol-error-fields.html
             default:
-                fostlib::insert(error.data(), "Unknown", string() + control, reply.read_string());
+                fostlib::insert(error.data(), "Unknown", string() + control, decode.read_string());
             }
         }
         throw error;

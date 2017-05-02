@@ -48,7 +48,8 @@ fostlib::pg::recordset::const_iterator fostlib::pg::recordset::end() const {
  */
 
 
-std::size_t fostlib::pg::recordset::impl::row_description(response description) {
+std::size_t fostlib::pg::recordset::impl::row_description(response desc_packet) {
+    decoder description(desc_packet);
     const auto count = description.read_int16();
     column_names.reserve(count);
     column_meta.reserve(count);
@@ -149,7 +150,8 @@ namespace {
 
 
 std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
-    const auto cols = data_row.read_int16();
+    decoder decode(data_row);
+    const auto cols = decode.read_int16();
     if ( cols != rsp.column_meta.size() ) {
         exceptions::not_implemented error(__func__, "Mismatch of column counts");
         insert(error.data(), "expected", rsp.column_meta.size());
@@ -157,12 +159,12 @@ std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
         throw error;
     }
     data.fields.clear();
-    while ( data_row.remaining() ) {
-        const auto bytes = data_row.read_int32();
+    while ( decode.remaining() ) {
+        const auto bytes = decode.read_int32();
         if ( bytes == -1 ) {
             data.fields.push_back(json());
         } else if ( rsp.column_meta[data.size()].format_code == 0 ) {
-            const auto str = data_row.read_u8_view(bytes);
+            const auto str = decode.read_u8_view(bytes);
             switch ( rsp.column_meta[data.size()].field_type_oid ) {
             case 23: // int32
                 data.fields.push_back(json(int_parser(str)));
@@ -191,10 +193,11 @@ std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
 bool fostlib::pg::recordset::const_iterator::impl::next_record(boost::asio::yield_context &yield) {
     while ( true ) {
         auto reply{rsp.cnx.read(yield)};
+        decoder decode(reply);
         if ( reply.type == 'C' ) {
             fostlib::log::debug(c_fost_pg)
                 ("", "Command close")
-                ("message", reply.read_string());
+                ("message", decode.read_string());
         } else if ( reply.type == 'D' ) {
             data_row = std::move(reply);
             decode_row();
