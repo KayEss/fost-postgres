@@ -38,6 +38,20 @@ fostlib::pg::connection::connection()
 }
 
 
+fostlib::pg::connection::connection(const fostlib::json &dsn) {
+    f5::sync s;
+    boost::asio::spawn(reactor().get_io_service(), s([&](auto yield) {
+        auto const host = coerce<nullable<string>>(dsn["host"]);
+        auto const database = coerce<nullable<string>>(dsn["dbname"]);
+        auto const user = coerce<nullable<string>>(dsn["user"]);
+        pimpl.reset(new impl(reactor().get_io_service(),
+            host.value_or("/var/run/postgresql/.s.PGSQL.5432").c_str(),
+            user.value_or("kirit"), database.value_or(""), yield));
+    }));
+    s.wait();
+}
+
+
 fostlib::pg::connection::~connection() = default;
 
 
@@ -88,6 +102,14 @@ fostlib::pg::command &fostlib::pg::command::write(const char *s) {
 }
 
 
+fostlib::pg::command &fostlib::pg::command::write(utf::u8_view str) {
+    for ( std::size_t index{}; index < str.bytes(); ++index )
+        byte(str.data()[index]);
+    byte(char{});
+    return *this;
+}
+
+
 void fostlib::pg::command::send(
     boost::asio::local::stream_protocol::socket &socket, boost::asio::yield_context &yield
 ) {
@@ -125,16 +147,26 @@ fostlib::pg::response::~response() = default;
 
 fostlib::pg::connection::impl::impl(
     boost::asio::io_service &ios, f5::lstring loc, boost::asio::yield_context &yield
-) : socket(ios) {
-    boost::asio::local::stream_protocol::endpoint ep(loc.c_str());
-    socket.async_connect(ep, yield);
-    auto logger = fostlib::log::debug(c_fost_pg);
+) : impl(ios, loc.c_str(), "kirit", utf::u8_view(), yield) {
+}
+fostlib::pg::connection::impl::impl(
+    boost::asio::io_service &ios, const char *loc, utf::u8_view user,
+    utf::u8_view database, boost::asio::yield_context &yield
+) : socket(ios)
+{
+    auto logger = fostlib::log::info(c_fost_pg);
     logger
-        ("", "Connected to unix domain socket")
-        ("path", loc.c_str());
+        ("path", loc)
+        ("dbname", database)
+        ("user", user);
+    boost::asio::local::stream_protocol::endpoint ep(loc);
+    socket.async_connect(ep, yield);
+    logger("", "Connected to unix domain socket");
     command cmd;
     cmd.write(int32_t{0x0003'0000});
-    cmd.write("user").write("kirit").byte(char{});
+    cmd.write("user").write(user);
+    if ( database.bytes() ) cmd.write("database").write(database);
+    cmd.byte(char{});
     cmd.send(socket, yield);
     while ( true ) {
         auto reply{read(yield)};

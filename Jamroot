@@ -26,6 +26,7 @@ alias fost :
         Cpp/fost-pg
         Cpp/fost-postgres
         Cpp/fost-pqxx
+        Cpp/select
     ;
 
 alias tests :

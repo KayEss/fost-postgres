@@ -57,6 +57,7 @@ namespace fostlib {
             }
 
             command &write(const char *);
+            command &write(utf::u8_view);
 
             /// Send the command to the server
             void send(boost::asio::local::stream_protocol::socket &, boost::asio::yield_context &);
@@ -96,7 +97,8 @@ namespace fostlib {
             }
 
             unsigned char read_byte() {
-                if ( not buffer.size() ) throw exceptions::not_implemented(__func__);
+                if ( not buffer.size() ) throw exceptions::not_implemented(__func__,
+                    "No bytes remaining");
                 const auto byte = buffer[0];
                 buffer = buffer.slice(1);
                 return byte;
@@ -111,13 +113,15 @@ namespace fostlib {
             }
 
             utf::u8_view read_u8_view(std::size_t bytes) {
-                if ( buffer.size() < bytes ) throw exceptions::not_implemented(__func__);
+                if ( buffer.size() < bytes ) throw exceptions::not_implemented(__func__,
+                    "No bytes remaining");
                 auto ret = buffer.slice(0, bytes);
                 buffer = buffer.slice(bytes);
                 return ret;
             }
             utf::u8_view read_u8_view() {
-                if ( not buffer.size() ) throw exceptions::not_implemented(__func__);
+                if ( not buffer.size() ) throw exceptions::not_implemented(__func__,
+                    "No bytes remaining");
                 auto start = buffer;
                 while ( read_byte() != 0 );
                 return array_view<unsigned char>(start.data(), buffer.data() - start.data() - 1);
@@ -130,6 +134,8 @@ namespace fostlib {
 
         struct connection::impl {
             impl(boost::asio::io_service &, f5::lstring, boost::asio::yield_context &);
+            impl(boost::asio::io_service &, const char *loc, utf::u8_view user,
+                 utf::u8_view database, boost::asio::yield_context &);
 
             boost::asio::local::stream_protocol::socket socket;
 

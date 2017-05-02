@@ -1,0 +1,6 @@
+
+fost-exe select
+    :
+        ../fost-pg
+        select.cpp
+    ;
