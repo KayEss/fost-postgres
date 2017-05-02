@@ -159,7 +159,9 @@ std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
     data.fields.clear();
     while ( data_row.remaining() ) {
         const auto bytes = data_row.read_int32();
-        if ( rsp.column_meta[data.size()].format_code == 0 ) {
+        if ( bytes == -1 ) {
+            data.fields.push_back(json());
+        } else if ( rsp.column_meta[data.size()].format_code == 0 ) {
             const auto str = data_row.read_u8_view(bytes);
             switch ( rsp.column_meta[data.size()].field_type_oid ) {
             case 23: // int32
