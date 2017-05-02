@@ -80,67 +80,6 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
 
 
 /*
- * fostlib::pg::command
- */
-
-
-fostlib::pg::command::command() {
-}
-
-
-fostlib::pg::command::command(char c) {
-    header.sputc(c);
-}
-
-
-fostlib::pg::command &fostlib::pg::command::write(const char *s) {
-    while (*s) {
-        byte(*s++);
-    }
-    byte(char{});
-    return *this;
-}
-
-
-fostlib::pg::command &fostlib::pg::command::write(utf::u8_view str) {
-    for ( std::size_t index{}; index < str.bytes(); ++index )
-        byte(str.data()[index]);
-    byte(char{});
-    return *this;
-}
-
-
-void fostlib::pg::command::send(
-    boost::asio::local::stream_protocol::socket &socket, boost::asio::yield_context &yield
-) {
-    const auto bytes{coerce<uint32_t>(4 + buffer.size())};
-    const auto send = boost::endian::native_to_big(bytes);
-    header.sputn(reinterpret_cast<const char*>(&send), 4);
-    std::array<boost::asio::streambuf::const_buffers_type, 2>
-        data{{header.data(), buffer.data()}};
-    fostlib::log::debug(c_fost_pg)
-        ("", "Sending data to Postgres")
-        ("size", "bytes", bytes)
-        ("size", "header", header.size())
-        ("size", "body", buffer.size());
-    async_write(socket, data, yield);
-}
-
-
-/*
- * fostlib::pg::response
- */
-
-
-fostlib::pg::response::response(char c, std::size_t size)
-: type(c), body(size) {
-}
-
-
-fostlib::pg::response::~response() = default;
-
-
-/*
  * fostlib::pg::connection::impl
  */
 
@@ -225,3 +164,63 @@ fostlib::pg::response fostlib::pg::connection::impl::read(boost::asio::yield_con
     return reply;
 }
 
+
+/*
+ * fostlib::pg::command
+ */
+
+
+fostlib::pg::command::command() {
+}
+
+
+fostlib::pg::command::command(char c) {
+    header.sputc(c);
+}
+
+
+fostlib::pg::command &fostlib::pg::command::write(const char *s) {
+    while (*s) {
+        byte(*s++);
+    }
+    byte(char{});
+    return *this;
+}
+
+
+fostlib::pg::command &fostlib::pg::command::write(utf::u8_view str) {
+    for ( std::size_t index{}; index < str.bytes(); ++index )
+        byte(str.data()[index]);
+    byte(char{});
+    return *this;
+}
+
+
+void fostlib::pg::command::send(
+    boost::asio::local::stream_protocol::socket &socket, boost::asio::yield_context &yield
+) {
+    const auto bytes{coerce<uint32_t>(4 + buffer.size())};
+    const auto send = boost::endian::native_to_big(bytes);
+    header.sputn(reinterpret_cast<const char*>(&send), 4);
+    std::array<boost::asio::streambuf::const_buffers_type, 2>
+        data{{header.data(), buffer.data()}};
+    fostlib::log::debug(c_fost_pg)
+        ("", "Sending data to Postgres")
+        ("size", "bytes", bytes)
+        ("size", "header", header.size())
+        ("size", "body", buffer.size());
+    async_write(socket, data, yield);
+}
+
+
+/*
+ * fostlib::pg::response
+ */
+
+
+fostlib::pg::response::response(char c, std::size_t size)
+: type(c), body(size) {
+}
+
+
+fostlib::pg::response::~response() = default;
