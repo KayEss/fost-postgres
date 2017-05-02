@@ -165,6 +165,9 @@ std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
             case 23: // int32
                 data.fields.push_back(json(int_parser(str)));
                 break;
+            case 25: // text
+                data.fields.push_back(json(string(str)));
+                break;
             default:
                 fostlib::log::warning(c_fost_pg)
                     ("", "Column value")
@@ -190,6 +193,11 @@ bool fostlib::pg::recordset::const_iterator::impl::next_record(boost::asio::yiel
             fostlib::log::debug(c_fost_pg)
                 ("", "Command close")
                 ("message", reply.read_string());
+        } else if ( reply.type == 'D' ) {
+            data_row = std::move(reply);
+            decode_row();
+            ++row_number;
+            return finished;
         } else if ( reply.type == 'Z' ) {
             finished = true;
             return finished;

@@ -30,3 +30,21 @@ FSL_TEST_FUNCTION(basic) {
     FSL_CHECK(pos == rs.end());
 }
 
+
+FSL_TEST_FUNCTION(rows) {
+    fostlib::pg::connection cnx;
+    auto rs = cnx.exec("SELECT ('a') AS c "
+        "UNION SELECT ('b') UNION SELECT ('c') ORDER BY c");
+    auto pos = rs.begin();
+    auto row = *pos;
+    FSL_CHECK_EQ(row.size(), 1u);
+    FSL_CHECK_EQ(row[0], fostlib::json("a"));
+    row = *++pos;
+    FSL_CHECK_EQ(row.size(), 1u);
+    FSL_CHECK_EQ(row[0], fostlib::json("b"));
+    row = *++pos;
+    FSL_CHECK_EQ(row.size(), 1u);
+    FSL_CHECK_EQ(row[0], fostlib::json("c"));
+    FSL_CHECK(++pos == rs.end());
+}
+
