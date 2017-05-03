@@ -1,0 +1,3 @@
+[submodule "pgasio"]
+	path = pgasio
+	url = git@github.com:KayEss/pgasio.git
