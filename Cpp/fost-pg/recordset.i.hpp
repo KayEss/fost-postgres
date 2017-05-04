@@ -9,6 +9,7 @@
 #pragma once
 
 #include "connection.i.hpp"
+#include <fost/pg/recordset.hpp>
 
 
 namespace fostlib {

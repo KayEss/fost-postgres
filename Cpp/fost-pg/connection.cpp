@@ -6,17 +6,17 @@
 */
 
 
-#include <f5/threading/sync.hpp>
-#include <fost/insert>
-#include <fost/log>
-#include <fost/exception/unexpected_eof.hpp>
-#include <fost/pg/connection.hpp>
-#include <fost/pg/recordset.hpp>
 #include "connection.i.hpp"
 #include "reactor.hpp"
 #include "recordset.i.hpp"
 
-#include <boost/asio/read.hpp>
+#include <pgasio/network.hpp>
+
+#include <f5/threading/sync.hpp>
+#include <fost/insert>
+#include <fost/log>
+#include <fost/exception/unexpected_eof.hpp>
+
 #include <boost/asio/write.hpp>
 
 
@@ -128,25 +128,14 @@ fostlib::pg::connection::impl::impl(
 
 
 fostlib::pg::response fostlib::pg::connection::impl::read(boost::asio::yield_context &yield) {
-    const auto transfer = [&](auto &buffer, std::size_t bytes) {
-        boost::system::error_code error;
-        boost::asio::async_read(socket, boost::asio::buffer(buffer),
-            boost::asio::transfer_exactly(bytes), (yield)[error]);
-        if ( error ) {
-            throw exceptions::unexpected_eof("Reading bytes from socket", error);
-        }
-    };
-    std::array<unsigned char, 5> header;
-    transfer(header, 5u);
-    uint32_t bytes = (header[1] << 24) +
-        (header[2] << 16) + (header[3] << 8) + header[4];
+    const auto header = pgasio::packet_header(socket, yield);
     fostlib::log::debug(c_fost_pg)
         ("", "Read length and control byte")
-        ("code", string() + header[0])
-        ("bytes", bytes)
-        ("body", bytes - 4);;
-    response reply(header[0], bytes - 4);
-    transfer(reply.body, reply.size());
+        ("code", string() + header.type)
+        ("bytes", header.total_size)
+        ("body", header.body_size);
+    response reply(header.type, header.body_size);
+    pgasio::transfer(socket, reply.body, reply.size(), yield);
     if ( reply.type == 'E' ) {
         exceptions::not_implemented error(__func__, "Postgres returned an error");
         decoder decode(reply);

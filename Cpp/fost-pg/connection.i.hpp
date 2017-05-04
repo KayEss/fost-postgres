@@ -8,12 +8,15 @@
 
 #pragma once
 
+#include <pgasio/memory.hpp>
 #include <fost/unicode>
 
 #include <boost/asio/local/stream_protocol.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/streambuf.hpp>
 #include <boost/endian/conversion.hpp>
+
+#include <fost/pg/connection.hpp>
 
 
 namespace fostlib {
@@ -65,7 +68,7 @@ namespace fostlib {
 
 
         struct decoder {
-            array_view<unsigned char> buffer;
+            pgasio::byte_view buffer;
 
             std::size_t remaining() {
                 return buffer.size();
@@ -92,7 +95,7 @@ namespace fostlib {
                     "No bytes remaining");
                 auto ret = buffer.slice(0, bytes);
                 buffer = buffer.slice(bytes);
-                return ret;
+                return array_view<unsigned char>(ret.data(), ret.size());
             }
             utf::u8_view read_u8_view() {
                 if ( not buffer.size() ) throw exceptions::not_implemented(__func__,

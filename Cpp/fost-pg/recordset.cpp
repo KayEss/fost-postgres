@@ -6,13 +6,13 @@
 */
 
 
+#include "recordset.i.hpp"
 #include <f5/threading/sync.hpp>
 #include <fost/insert>
 #include <fost/log>
 #include <fost/parse/parse.hpp>
 #include <fost/exception/parse_error.hpp>
 #include <fost/pg/recordset.hpp>
-#include "recordset.i.hpp"
 
 
 /*

@@ -5,6 +5,7 @@ use-project fost-orm : ../fost-orm/ ;
 include ../fost-base/fost.jam ;
 
 fost-project fost-postgres :
+        <include>pgasio/include
         <include>../fost-orm/Cpp/include
         <include>../PostgreSQL/pqxx/include
 
@@ -32,6 +33,7 @@ alias fost :
 alias tests :
         ../fost-base//tests
         ../fost-orm//tests
+        pgasio//test
         Cpp/fost-pg-test
         Cpp/fost-postgres-test
     ;
