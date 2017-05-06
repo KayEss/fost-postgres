@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <pgasio/memory.hpp>
+#include <pgasio/network.hpp>
 #include <fost/unicode>
 
 #include <boost/asio/local/stream_protocol.hpp>
@@ -67,42 +67,18 @@ namespace fostlib {
         };
 
 
-        struct decoder {
-            pgasio::byte_view buffer;
-
-            std::size_t remaining() {
-                return buffer.size();
-            }
-
-            unsigned char read_byte() {
-                if ( not buffer.size() ) throw exceptions::not_implemented(__func__,
-                    "No bytes remaining");
-                const auto byte = buffer[0];
-                buffer = buffer.slice(1);
-                return byte;
-            }
-
-            int16_t read_int16() {
-                return (read_byte() << 8) + read_byte();
-            }
-            int32_t read_int32() {
-                return (read_byte() << 24) + (read_byte() << 16)
-                    + (read_byte() << 8) + read_byte();
+        struct decoder : public pgasio::decoder {
+            decoder(pgasio::byte_view b)
+            : pgasio::decoder(b) {
             }
 
             utf::u8_view read_u8_view(std::size_t bytes) {
-                if ( buffer.size() < bytes ) throw exceptions::not_implemented(__func__,
-                    "No bytes remaining");
-                auto ret = buffer.slice(0, bytes);
-                buffer = buffer.slice(bytes);
-                return array_view<unsigned char>(ret.data(), ret.size());
+                const auto view = read_bytes(bytes);
+                return array_view<unsigned char>(view.data(), view.size());
             }
             utf::u8_view read_u8_view() {
-                if ( not buffer.size() ) throw exceptions::not_implemented(__func__,
-                    "No bytes remaining");
-                auto start = buffer;
-                while ( read_byte() != 0 );
-                return array_view<unsigned char>(start.data(), buffer.data() - start.data() - 1);
+                const auto view = read_string_view();
+                return array_view<unsigned char>(view.data(), view.size());
             }
             string read_string() {
                 return read_u8_view();

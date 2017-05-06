@@ -128,29 +128,26 @@ fostlib::pg::connection::impl::impl(
 
 
 fostlib::pg::response fostlib::pg::connection::impl::read(boost::asio::yield_context &yield) {
-    const auto header = pgasio::packet_header(socket, yield);
-    fostlib::log::debug(c_fost_pg)
-        ("", "Read length and control byte")
-        ("code", string() + header.type)
-        ("bytes", header.total_size)
-        ("body", header.body_size);
-    response reply(header.type, header.body_size);
-    pgasio::transfer(socket, reply.body, reply.size(), yield);
-    if ( reply.type == 'E' ) {
+    try {
+        const auto header = pgasio::packet_header(socket, yield);
+        fostlib::log::debug(c_fost_pg)
+            ("", "Read length and control byte")
+            ("code", string() + header.type)
+            ("bytes", header.total_size)
+            ("body", header.body_size);
+        response reply(header.type, header.body_size);
+        pgasio::transfer(socket, reply.body, reply.size(), yield);
+        return reply;
+    } catch ( pgasio::postgres_error &e ) {
         exceptions::not_implemented error(__func__, "Postgres returned an error");
-        decoder decode(reply);
-        while ( decode.remaining() > 1 ) {
-            switch ( auto control = decode.read_byte() ) {
-                /// See the Postgres documentation for the possible values that
-                /// are sent here.
-                /// https://www.postgresql.org/docs/current/static/protocol-error-fields.html
+        for ( const auto &m : e.messages ) {
+            switch ( auto control = m.first ) {
             default:
-                fostlib::insert(error.data(), "Unknown", string() + control, decode.read_string());
+                fostlib::insert(error.data(), "Unknown", string() + m.first, string(m.second));
             }
         }
         throw error;
     }
-    return reply;
 }
 
 
