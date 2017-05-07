@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <pgasio/network.hpp>
+#include <pgasio/connection.hpp>
 #include <fost/unicode>
 
 #include <boost/asio/local/stream_protocol.hpp>
