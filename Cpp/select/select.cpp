@@ -20,7 +20,9 @@ namespace {
 }
 
 
-FSL_MAIN("select", "select")(fostlib::ostream &out, fostlib::arguments &args) {
+FSL_MAIN("select", "SELECT data\nCopyright 2017, Felspar Co Ltd")
+    (fostlib::ostream &out, fostlib::arguments &args)
+{
     if ( args.size() < 3 ) {
         out << "Missing arguments\n\n    "
             << args[0] << " [options] dbname \"SELECT .... FROM ...\"\n"

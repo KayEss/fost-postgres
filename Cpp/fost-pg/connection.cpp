@@ -75,8 +75,11 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
                         "Expected Z packet after recordset end (C) packet");
                 }
             } else if ( header.type == 'D' ) {
+                auto logger = fostlib::log::debug(c_fost_pg);
+                logger("", "Got first data row. Starting block");
                 pgasio::record_block block{rs->column_meta.size()};
                 rs->next_body_size = block.read_rows(pimpl->socket, header.body_size, yield);
+                logger("next_body_size", rs->next_body_size);
                 rs->fields = block.fields();
                 rs->block = std::move(block);
                 return;
@@ -129,7 +132,9 @@ fostlib::pg::connection::impl::impl(
         } else if ( reply.header.type == 'R' ) {
             logger("authentication", "ok");
         } else if ( reply.header.type == 'S' ) {
-            logger("setting", decode.read_string(), decode.read_string());
+            const auto name = decode.read_string();
+            const auto value = decode.read_string();
+            logger("setting", name, value);
         } else if ( reply.header.type == 'Z' ) {
             logger("", "Connected to Postgres");
             return;

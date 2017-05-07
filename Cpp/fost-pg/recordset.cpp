@@ -83,7 +83,15 @@ fostlib::pg::recordset::const_iterator::const_iterator(fostlib::pg::recordset::i
     if ( begin ) {
         auto cols = rs.column_names.size();
         pimpl.reset(new impl{rs, record{cols}});
-        pimpl->decode_row();
+        if ( rs.block ) {
+            fostlib::log::debug(c_fost_pg)
+                ("", "Starting with recordset with data in it");
+            pimpl->decode_row();
+        } else {
+            fostlib::log::debug(c_fost_pg)
+                ("", "Starting with empty recordset");
+            pimpl->finished = true;
+        }
     } else {
         pimpl.reset(new impl{rs});
     }
