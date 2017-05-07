@@ -125,7 +125,7 @@ namespace fostlib {
 
         struct connection::impl {
             impl(boost::asio::io_service &, f5::lstring, boost::asio::yield_context &);
-            impl(boost::asio::io_service &, const char *loc, utf::u8_view user,
+            impl(boost::asio::io_service &, const char *loc, const char *user,
                  utf::u8_view database, boost::asio::yield_context &);
 
             boost::asio::local::stream_protocol::socket socket;

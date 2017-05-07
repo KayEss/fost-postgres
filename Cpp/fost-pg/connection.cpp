@@ -19,6 +19,8 @@
 
 #include <boost/asio/write.hpp>
 
+#include <cstdlib>
+
 
 const fostlib::module fostlib::pg::c_fost_pg(c_fost, "pg");
 
@@ -46,7 +48,7 @@ fostlib::pg::connection::connection(const fostlib::json &dsn) {
         auto const user = coerce<nullable<string>>(dsn["user"]);
         pimpl.reset(new impl(reactor().get_io_service(),
             host.value_or("/var/run/postgresql/.s.PGSQL.5432").c_str(),
-            user.value_or("kirit"), database.value_or(""), yield));
+            user.value_or(std::getenv("LOGNAME")).c_str(), database.value_or(""), yield));
     }));
     s.wait();
 }
@@ -102,10 +104,10 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
 
 fostlib::pg::connection::impl::impl(
     boost::asio::io_service &ios, f5::lstring loc, boost::asio::yield_context &yield
-) : impl(ios, loc.c_str(), "kirit", utf::u8_view(), yield) {
+) : impl(ios, loc.c_str(), std::getenv("LOGNAME"), utf::u8_view(), yield) {
 }
 fostlib::pg::connection::impl::impl(
-    boost::asio::io_service &ios, const char *loc, utf::u8_view user,
+    boost::asio::io_service &ios, const char *loc, const char *user,
     utf::u8_view database, boost::asio::yield_context &yield
 ) : socket(ios)
 {
