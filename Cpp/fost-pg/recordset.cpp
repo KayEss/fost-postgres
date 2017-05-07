@@ -9,7 +9,6 @@
 #include "recordset.i.hpp"
 #include <f5/threading/sync.hpp>
 #include <fost/insert>
-#include <fost/log>
 #include <fost/parse/parse.hpp>
 #include <fost/exception/parse_error.hpp>
 #include <fost/pg/recordset.hpp>
@@ -84,12 +83,8 @@ fostlib::pg::recordset::const_iterator::const_iterator(fostlib::pg::recordset::i
         auto cols = rs.column_names.size();
         pimpl.reset(new impl{rs, record{cols}});
         if ( rs.block ) {
-            fostlib::log::debug(c_fost_pg)
-                ("", "Starting with recordset with data in it");
             pimpl->decode_row();
         } else {
-            fostlib::log::debug(c_fost_pg)
-                ("", "Starting with empty recordset");
             pimpl->finished = true;
         }
     } else {
