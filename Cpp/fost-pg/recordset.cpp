@@ -192,29 +192,6 @@ std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
 }
 
 
-// bool fostlib::pg::recordset::const_iterator::impl::next_record(boost::asio::yield_context &yield) {
-//     while ( true ) {
-//         auto reply{rsp.cnx.read(yield)};
-//         decoder decode(reply);
-//         if ( reply.type == 'C' ) {
-//             fostlib::log::debug(c_fost_pg)
-//                 ("", "Command close")
-//                 ("message", decode.read_string());
-//         } else if ( reply.type == 'D' ) {
-//             data_row = std::move(reply);
-//             decode_row();
-//             ++row_number;
-//             return finished;
-//         } else if ( reply.type == 'Z' ) {
-//             finished = true;
-//             return finished;
-//         } else {
-//             throw exceptions::not_implemented(__func__, reply.code());
-//         }
-//     }
-// }
-
-
 /*
  * fostlib::pg::record
  */
