@@ -87,13 +87,16 @@ namespace fostlib {
 
 
         struct response {
-            char type;
+            pgasio::header header;
             std::vector<unsigned char> body;
 
             response()
-            : type{} {
+            : header{} {
             }
-            response(char code, std::size_t size);
+            template<typename S>
+            response(pgasio::header h, S &socket, boost::asio::yield_context&yield)
+            : header{h}, body{h.packet_body(socket, yield)} {
+            }
 
             ~response();
 
@@ -105,7 +108,7 @@ namespace fostlib {
 
             utf::u8_view code() const {
                 return array_view<unsigned char>(
-                    reinterpret_cast<const unsigned char *>(&type), 1);
+                    reinterpret_cast<const unsigned char *>(&header.type), 1);
             }
             unsigned char *data() {
                 return body.data();

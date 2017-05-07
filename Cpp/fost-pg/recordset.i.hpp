@@ -9,6 +9,7 @@
 #pragma once
 
 #include "connection.i.hpp"
+#include <pgasio/recordset.hpp>
 #include <fost/pg/recordset.hpp>
 
 
@@ -35,20 +36,28 @@ namespace fostlib {
             std::vector<cmeta> column_meta;
             std::size_t row_description(response);
 
-            nullable<response> first_data_row;
+            std::size_t next_body_size;
+            pgasio::array_view<const pgasio::byte_view> fields;
+            nullable<pgasio::record_block> block;
         };
 
 
         struct recordset::const_iterator::impl {
-            recordset::impl &rsp;
-            response data_row;
-            record data;
+            impl(recordset::impl &rs)
+            : rsp(rs), data{0}, finished{true}, row_number{} {
+            }
+            impl(recordset::impl &rs, record r)
+            : rsp(rs), data(std::move(r)),
+                finished(false), row_number{}
+            {
+            }
 
+            recordset::impl &rsp;
+            record data;
             bool finished;
             std::size_t row_number;
 
             std::size_t decode_row();
-            bool next_record(boost::asio::yield_context &);
         };
 
 

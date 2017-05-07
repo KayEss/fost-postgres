@@ -63,14 +63,17 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
         query.write(sql.underlying().c_str());
         query.send(pimpl->socket, yield);
         while ( true ) {
-            auto reply{pimpl->read(yield)};
-            if ( reply.type == 'D' ) {
-                rs->first_data_row = std::move(reply);
+            auto header = pgasio::packet_header(pimpl->socket, yield);
+            if ( header.type == 'D' ) {
+                pgasio::record_block block{rs->column_meta.size()};
+                rs->next_body_size = block.read_rows(pimpl->socket, header.body_size, yield);
+                rs->fields = block.fields();
+                rs->block = std::move(block);
                 return;
-            } else if ( reply.type == 'T' ) {
-                rs->row_description(std::move(reply));
+            } else if ( header.type == 'T' ) {
+                rs->row_description(response(header, pimpl->socket, yield));
             } else {
-                throw exceptions::not_implemented(__func__, reply.code());
+                throw exceptions::not_implemented(__func__, fostlib::string() + header.type);
             }
         }
     }));
@@ -110,14 +113,14 @@ fostlib::pg::connection::impl::impl(
     while ( true ) {
         auto reply{read(yield)};
         decoder decode(reply);
-        if ( reply.type == 'K' ) {
+        if ( reply.header.type == 'K' ) {
             logger("cancellation", "process-id", decode.read_int32());
             logger("cancellation", "secret", decode.read_int32());
-        } else if ( reply.type == 'R' ) {
+        } else if ( reply.header.type == 'R' ) {
             logger("authentication", "ok");
-        } else if ( reply.type == 'S' ) {
+        } else if ( reply.header.type == 'S' ) {
             logger("setting", decode.read_string(), decode.read_string());
-        } else if ( reply.type == 'Z' ) {
+        } else if ( reply.header.type == 'Z' ) {
             logger("", "Connected to Postgres");
             return;
         } else {
@@ -135,9 +138,7 @@ fostlib::pg::response fostlib::pg::connection::impl::read(boost::asio::yield_con
             ("code", string() + header.type)
             ("bytes", header.total_size)
             ("body", header.body_size);
-        response reply(header.type, header.body_size);
-        pgasio::transfer(socket, reply.body, reply.size(), yield);
-        return reply;
+        return response{header, socket, yield};
     } catch ( pgasio::postgres_error &e ) {
         exceptions::not_implemented error(__func__, "Postgres returned an error");
         for ( const auto &m : e.messages ) {
@@ -202,11 +203,6 @@ void fostlib::pg::command::send(
 /*
  * fostlib::pg::response
  */
-
-
-fostlib::pg::response::response(char c, std::size_t size)
-: type(c), body(size) {
-}
 
 
 fostlib::pg::response::~response() = default;

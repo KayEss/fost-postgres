@@ -80,15 +80,12 @@ std::size_t fostlib::pg::recordset::impl::row_description(response desc_packet) 
 
 
 fostlib::pg::recordset::const_iterator::const_iterator(fostlib::pg::recordset::impl &rs, bool begin) {
-    if ( begin && rs.first_data_row ) {
-        pimpl.reset(new impl{rs, std::move(rs.first_data_row.value()),
-            record{rs.column_names.size()}, false, 1u});
-        rs.first_data_row = null;
+    if ( begin ) {
+        auto cols = rs.column_names.size();
+        pimpl.reset(new impl{rs, record{cols}});
         pimpl->decode_row();
-    } else if ( not begin ) {
-        pimpl.reset(new impl{rs, response(), record{0}, true, 0u});
     } else {
-        throw exceptions::not_implemented("This recordset has already been iterated over");
+        pimpl.reset(new impl{rs});
     }
 }
 
@@ -103,11 +100,22 @@ const fostlib::pg::record &fostlib::pg::recordset::const_iterator::operator * ()
 
 
 fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::operator ++ () {
-    f5::sync s;
-    boost::asio::spawn(pimpl->rsp.cnx.socket.get_io_service(), s([&](auto yield) {
-        pimpl->next_record(yield);
-    }));
-    s.wait();
+    if ( not pimpl->rsp.fields.size() ) {
+        if ( pimpl->rsp.next_body_size ) {
+            f5::sync s;
+            boost::asio::spawn(pimpl->rsp.cnx.socket.get_io_service(), s([&](auto yield) {
+                pgasio::record_block block{pimpl->rsp.column_meta.size()};
+                pimpl->rsp.next_body_size =
+                    block.read_rows(pimpl->rsp.cnx.socket, pimpl->rsp.next_body_size, yield);
+                pimpl->rsp.fields = block.fields();
+                pimpl->rsp.block = std::move(block);
+            }));
+            s.wait();
+        } else {
+            pimpl->finished = true;
+        }
+    }
+    if ( not pimpl->finished ) pimpl->decode_row();
     return *this;
 }
 
@@ -150,21 +158,14 @@ namespace {
 
 
 std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
-    decoder decode(data_row);
-    const auto cols = decode.read_int16();
-    if ( cols != rsp.column_meta.size() ) {
-        exceptions::not_implemented error(__func__, "Mismatch of column counts");
-        insert(error.data(), "expected", rsp.column_meta.size());
-        insert(error.data(), "got", cols);
-        throw error;
-    }
+    auto fields = rsp.fields.slice(0, rsp.column_meta.size());
+    rsp.fields = rsp.fields.slice(fields.size());
     data.fields.clear();
-    while ( decode.remaining() ) {
-        const auto bytes = decode.read_int32();
-        if ( bytes == -1 ) {
+    for ( data.fields.clear(); fields.size(); fields = fields.slice(1) ) {
+        if ( fields[0].data() == nullptr ) {
             data.fields.push_back(json());
         } else if ( rsp.column_meta[data.size()].format_code == 0 ) {
-            const auto str = decode.read_u8_view(bytes);
+            const utf::u8_view str{reinterpret_cast<const char *>(fields[0].data()), fields[0].size()};
             switch ( rsp.column_meta[data.size()].field_type_oid ) {
             case 23: // int32
                 data.fields.push_back(json(int_parser(str)));
@@ -179,38 +180,38 @@ std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
                     ("field_type_oid", rsp.column_meta[data.size()].field_type_oid)
                     ("type_modifier", rsp.column_meta[data.size()].type_modifier)
                     ("format_code", rsp.column_meta[data.size()].format_code)
-                    ("bytes", bytes);
+                    ("bytes", str.bytes());
                 data.fields.push_back(json(string(str)));
             }
         } else {
             throw exceptions::not_implemented(__func__, "Binary format");
         }
     }
-    return cols;
+    return data.size();
 }
 
 
-bool fostlib::pg::recordset::const_iterator::impl::next_record(boost::asio::yield_context &yield) {
-    while ( true ) {
-        auto reply{rsp.cnx.read(yield)};
-        decoder decode(reply);
-        if ( reply.type == 'C' ) {
-            fostlib::log::debug(c_fost_pg)
-                ("", "Command close")
-                ("message", decode.read_string());
-        } else if ( reply.type == 'D' ) {
-            data_row = std::move(reply);
-            decode_row();
-            ++row_number;
-            return finished;
-        } else if ( reply.type == 'Z' ) {
-            finished = true;
-            return finished;
-        } else {
-            throw exceptions::not_implemented(__func__, reply.code());
-        }
-    }
-}
+// bool fostlib::pg::recordset::const_iterator::impl::next_record(boost::asio::yield_context &yield) {
+//     while ( true ) {
+//         auto reply{rsp.cnx.read(yield)};
+//         decoder decode(reply);
+//         if ( reply.type == 'C' ) {
+//             fostlib::log::debug(c_fost_pg)
+//                 ("", "Command close")
+//                 ("message", decode.read_string());
+//         } else if ( reply.type == 'D' ) {
+//             data_row = std::move(reply);
+//             decode_row();
+//             ++row_number;
+//             return finished;
+//         } else if ( reply.type == 'Z' ) {
+//             finished = true;
+//             return finished;
+//         } else {
+//             throw exceptions::not_implemented(__func__, reply.code());
+//         }
+//     }
+// }
 
 
 /*
