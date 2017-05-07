@@ -200,15 +200,16 @@ std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
                     "Timestamp fields without time zones are explicitly disabled. "
                     "Fix your schema to use 'timestamp with time zone'");
             default:
+#ifdef DEBUG
                 fostlib::log::warning(c_fost_pg)
                     ("", "Postgres type decoding -- unknown type OID")
-//                     ("name", rsp.column_names[data.size()])
+                    ("name", rsp.column_names[data.size()])
                     ("field_type_oid", rsp.column_meta[data.size()].field_type_oid)
-//                     ("type_modifier", rsp.column_meta[data.size()].type_modifier)
-//                     ("format_code", rsp.column_meta[data.size()].format_code)
-//                     ("bytes", str.bytes())
-//                     ("string", str)
-                    ;
+                    ("type_modifier", rsp.column_meta[data.size()].type_modifier)
+                    ("format_code", rsp.column_meta[data.size()].format_code)
+                    ("bytes", str.bytes())
+                    ("string", str);
+#endif
             case 25: // text
             case 1043: // varchar
             case 1082: // date
