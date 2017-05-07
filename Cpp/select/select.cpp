@@ -42,8 +42,12 @@ FSL_MAIN("select", "SELECT data\nCopyright 2017, Felspar Co Ltd")
     fostlib::pg::connection cnx(dsn);
 
     auto results = cnx.exec(args[2].value().c_str());
-    auto comma = std::experimental::make_ostream_joiner(std::cout, ",");
-        /// TODO: Display column headings
+    {
+        auto comma = std::experimental::make_ostream_joiner(std::cout, ",");
+        for ( auto &&name : results.columns() ) {
+            *comma++ = fostlib::json::unparse(fostlib::json(name), false);
+        }
+    }
     for ( auto &&row : results ) {
         out << '\n';
         auto comma = std::experimental::make_ostream_joiner(std::cout, ",");
