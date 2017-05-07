@@ -215,6 +215,8 @@ std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
             case 1082: // date
             case 1083: // time
             case 1184: // timestamp with time zone
+            case 1700: // numeric
+            case 2950: // uuid
                 data.fields.push_back(json(string(str)));
             }
         } else {
