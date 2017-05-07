@@ -22,6 +22,7 @@ FSL_TEST_FUNCTION(basic) {
     FSL_CHECK_EQ(names[0].value(), "col1");
     FSL_CHECK(not names[1]);
     auto pos = rs.begin();
+    FSL_CHECK(pos != rs.end());
     auto row = *pos;
     FSL_CHECK_EQ(row.size(), 2u);
     FSL_CHECK_EQ(row[0], fostlib::json(1));
