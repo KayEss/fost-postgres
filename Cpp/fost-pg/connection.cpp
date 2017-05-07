@@ -59,8 +59,10 @@ fostlib::pg::connection::~connection() = default;
 
 fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
     f5::sync s;
-    auto rs = std::make_unique<recordset::impl>(*pimpl);
-    boost::asio::spawn(pimpl->socket.get_io_service(), s([&](auto yield) {
+    auto rsp = std::make_unique<recordset::impl>(*pimpl);
+    boost::asio::spawn(pimpl->socket.get_io_service(),
+        [s = &s, this, &sql, rs=rsp.get()](auto yield)
+    {
         command query{'Q'};
         query.write(sql.underlying().c_str());
         query.send(pimpl->socket, yield);
@@ -68,22 +70,26 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
             auto header = pgasio::packet_header(pimpl->socket, yield);
             if ( header.type == 'C' ) {
                 response(header, pimpl->socket, yield);
-                rs->next_body_size = 0u;
                 auto zed = pgasio::packet_header(pimpl->socket, yield);
                 if ( zed.type == 'Z' ) {
+                    s->done();
                     return;
                 } else {
                     throw exceptions::not_implemented(__func__,
                         "Expected Z packet after recordset end (C) packet");
                 }
             } else if ( header.type == 'D' ) {
-                auto logger = fostlib::log::debug(c_fost_pg);
-                logger("", "Got first data row. Starting block");
-                pgasio::record_block block{rs->column_meta.size()};
-                rs->next_body_size = block.read_rows(pimpl->socket, header.body_size, yield);
-                logger("next_body_size", rs->next_body_size);
+                pgasio::record_block block{rs->column_meta.size(), header.body_size, header.body_size};
+                auto next_block_size = block.read_rows(pimpl->socket, header.body_size, yield);
                 rs->fields = block.fields();
                 rs->block = std::move(block);
+                s->done();
+                while ( next_block_size ) {
+                    pgasio::record_block block(rs->column_meta.size());
+                    next_block_size = block.read_rows(pimpl->socket, next_block_size, yield);
+                    rs->blocks.produce(std::move(block), yield);
+                }
+                rs->blocks.produce(pgasio::record_block{}, yield);
                 return;
             } else if ( header.type == 'T' ) {
                 rs->row_description(response(header, pimpl->socket, yield));
@@ -91,9 +97,9 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
                 throw exceptions::not_implemented(__func__, fostlib::string() + header.type);
             }
         }
-    }));
+    });
     s.wait();
-    return recordset(std::move(rs));
+    return recordset(std::move(rsp));
 }
 
 

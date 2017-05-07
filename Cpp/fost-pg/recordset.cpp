@@ -104,14 +104,17 @@ const fostlib::pg::record &fostlib::pg::recordset::const_iterator::operator * ()
 
 fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::operator ++ () {
     if ( not pimpl->rsp.fields.size() ) {
-        if ( pimpl->rsp.next_body_size ) {
+        if ( pimpl->rsp.fields.data() ) {
             f5::sync s;
-            boost::asio::spawn(pimpl->rsp.cnx.socket.get_io_service(), s([&](auto yield) {
-                pgasio::record_block block{pimpl->rsp.column_meta.size()};
-                pimpl->rsp.next_body_size =
-                    block.read_rows(pimpl->rsp.cnx.socket, pimpl->rsp.next_body_size, yield);
-                pimpl->rsp.fields = block.fields();
-                pimpl->rsp.block = std::move(block);
+            boost::asio::spawn(pimpl->rsp.blocks.get_io_service(), s([&](auto yield) {
+                pgasio::record_block block{pimpl->rsp.blocks.consume(yield)};
+                if ( block.fields().data() == nullptr ) {
+                    pimpl->finished = true;
+                    pimpl->rsp.block = null;
+                } else {
+                    pimpl->rsp.fields = block.fields();
+                    pimpl->rsp.block = std::move(block);
+                }
             }));
             s.wait();
         } else {

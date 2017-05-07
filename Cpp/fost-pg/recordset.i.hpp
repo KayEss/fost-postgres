@@ -11,6 +11,7 @@
 #include "connection.i.hpp"
 #include <pgasio/recordset.hpp>
 #include <fost/pg/recordset.hpp>
+#include <f5/threading/channel.hpp>
 
 
 namespace fostlib {
@@ -21,7 +22,7 @@ namespace fostlib {
             connection::impl &cnx;
 
             impl(connection::impl &c)
-            : cnx(c) {
+            : cnx(c), blocks(c.socket.get_io_service(), 50)  {
             }
 
             std::vector<fostlib::nullable<fostlib::string>> column_names;
@@ -36,7 +37,7 @@ namespace fostlib {
             std::vector<cmeta> column_meta;
             std::size_t row_description(response);
 
-            std::size_t next_body_size;
+            f5::boost_asio::channel<pgasio::record_block> blocks;
             pgasio::array_view<const pgasio::byte_view> fields;
             nullable<pgasio::record_block> block;
         };
