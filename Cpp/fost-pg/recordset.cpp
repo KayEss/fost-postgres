@@ -131,7 +131,9 @@ fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::
 
 bool fostlib::pg::recordset::const_iterator::operator == (const const_iterator &r) const {
     return &pimpl->rsp == &r.pimpl->rsp &&
-        ((pimpl->finished && r.pimpl->finished) || pimpl->row_number == r.pimpl->row_number);
+        ((pimpl->finished && r.pimpl->finished) ||
+            (not pimpl->finished && not r.pimpl->finished &&
+                pimpl->row_number == r.pimpl->row_number));
 }
 
 
