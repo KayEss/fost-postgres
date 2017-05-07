@@ -113,6 +113,7 @@ fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::
             s.wait();
         } else {
             pimpl->finished = true;
+            pimpl->rsp.block = null;
         }
     }
     if ( not pimpl->finished ) pimpl->decode_row();
