@@ -49,3 +49,11 @@ FSL_TEST_FUNCTION(rows) {
     FSL_CHECK(++pos == rs.end());
 }
 
+
+FSL_TEST_FUNCTION(no_rows) {
+    fostlib::pg::connection cnx;
+    auto rs = cnx.exec("SELECT 1 WHERE 1=2");
+    auto pos = rs.begin();
+    FSL_CHECK(pos == rs.end());
+}
+

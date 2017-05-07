@@ -64,7 +64,17 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
         query.send(pimpl->socket, yield);
         while ( true ) {
             auto header = pgasio::packet_header(pimpl->socket, yield);
-            if ( header.type == 'D' ) {
+            if ( header.type == 'C' ) {
+                response(header, pimpl->socket, yield);
+                rs->next_body_size = 0u;
+                auto zed = pgasio::packet_header(pimpl->socket, yield);
+                if ( zed.type == 'Z' ) {
+                    return;
+                } else {
+                    throw exceptions::not_implemented(__func__,
+                        "Expected Z packet after recordset end (C) packet");
+                }
+            } else if ( header.type == 'D' ) {
                 pgasio::record_block block{rs->column_meta.size()};
                 rs->next_body_size = block.read_rows(pimpl->socket, header.body_size, yield);
                 rs->fields = block.fields();
