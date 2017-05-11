@@ -73,6 +73,88 @@ std::size_t fostlib::pg::recordset::impl::row_description(response desc_packet) 
 }
 
 
+namespace {
+    inline int64_t int_parser(fostlib::utf::u8_view value) {
+        int64_t ret{};
+        auto pos = value.begin();
+        if ( not boost::spirit::qi::parse(pos, value.end(),
+                boost::spirit::qi::int_parser<int64_t>(), ret) && pos == value.end() )
+        {
+            throw fostlib::exceptions::parse_error("Whilst parsing an int", value);
+        } else {
+            return ret;
+        }
+    }
+    inline double float_parser(fostlib::utf::u8_view value) {
+        double ret{0};
+        auto pos = value.begin();
+        if ( not boost::spirit::qi::parse(pos, value.end(),
+                boost::spirit::qi::double_, ret) && pos == value.end() )
+        {
+            throw fostlib::exceptions::parse_error("Whilst parsing a double", value);
+        } else {
+            return ret;
+        }
+    }
+}
+void fostlib::pg::recordset::impl::decode_fields(
+    std::vector<fostlib::json> &data,
+    pgasio::array_view<const pgasio::byte_view> fields
+) {
+    for ( ; fields.size(); fields = fields.slice(1) ) {
+        if ( fields[0].data() == nullptr ) {
+            data.push_back(json());
+        } else if ( column_meta[data.size()].format_code == 0 ) {
+            const utf::u8_view str{reinterpret_cast<const char *>(fields[0].data()), fields[0].size()};
+            switch ( column_meta[data.size()].field_type_oid ) {
+            case 16: // bool
+                data.push_back(fostlib::json(str.data()[0] == 't' ? true : false));
+                break;
+            case 21: // int2
+            case 23: // int4
+            case 20: // int8
+            case 26: // oid
+                data.push_back(json(int_parser(str)));
+                break;
+            case 700: // float4
+            case 701: // float8
+                data.push_back(fostlib::json(float_parser(str)));
+                break;
+            case 114: // json
+            case 3802: // jsonb
+                data.push_back(fostlib::json::parse(str));
+                break;
+            case 1114: // timestamp without time zone
+                throw fostlib::exceptions::not_implemented(__FUNCTION__,
+                    "Timestamp fields without time zones are explicitly disabled. "
+                    "Fix your schema to use 'timestamp with time zone'");
+            default:
+#ifdef DEBUG
+                fostlib::log::warning(c_fost_pg)
+                    ("", "Postgres type decoding -- unknown type OID")
+                    ("name", column_names[data.size()])
+                    ("field_type_oid", column_meta[data.size()].field_type_oid)
+                    ("type_modifier", column_meta[data.size()].type_modifier)
+                    ("format_code", column_meta[data.size()].format_code)
+                    ("bytes", str.bytes())
+                    ("string", str);
+#endif
+            case 25: // text
+            case 1043: // varchar
+            case 1082: // date
+            case 1083: // time
+            case 1184: // timestamp with time zone
+            case 1700: // numeric
+            case 2950: // uuid
+                data.push_back(json(string(str)));
+            }
+        } else {
+            throw exceptions::not_implemented(__func__, "Binary format");
+        }
+    }
+}
+
+
 /*
  * fostlib::pg::recordset::const_iterator
  */
@@ -140,87 +222,11 @@ bool fostlib::pg::recordset::const_iterator::operator == (const const_iterator &
  */
 
 
-namespace {
-    inline int64_t int_parser(fostlib::utf::u8_view value) {
-        int64_t ret{};
-        auto pos = value.begin();
-        if ( not boost::spirit::qi::parse(pos, value.end(),
-                boost::spirit::qi::int_parser<int64_t>(), ret) && pos == value.end() )
-        {
-            throw fostlib::exceptions::parse_error("Whilst parsing an int", value);
-        } else {
-            return ret;
-        }
-    }
-    inline double float_parser(fostlib::utf::u8_view value) {
-        double ret{0};
-        auto pos = value.begin();
-        if ( not boost::spirit::qi::parse(pos, value.end(),
-                boost::spirit::qi::double_, ret) && pos == value.end() )
-        {
-            throw fostlib::exceptions::parse_error("Whilst parsing a double", value);
-        } else {
-            return ret;
-        }
-    }
-}
-
-
 std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
     auto fields = rsp.fields.slice(0, rsp.column_meta.size());
     rsp.fields = rsp.fields.slice(fields.size());
     data.fields.clear();
-    for ( data.fields.clear(); fields.size(); fields = fields.slice(1) ) {
-        if ( fields[0].data() == nullptr ) {
-            data.fields.push_back(json());
-        } else if ( rsp.column_meta[data.size()].format_code == 0 ) {
-            const utf::u8_view str{reinterpret_cast<const char *>(fields[0].data()), fields[0].size()};
-            switch ( rsp.column_meta[data.size()].field_type_oid ) {
-            case 16: // bool
-                data.fields.push_back(fostlib::json(str.data()[0] == 't' ? true : false));
-                break;
-            case 21: // int2
-            case 23: // int4
-            case 20: // int8
-            case 26: // oid
-                data.fields.push_back(json(int_parser(str)));
-                break;
-            case 700: // float4
-            case 701: // float8
-                data.fields.push_back(fostlib::json(float_parser(str)));
-                break;
-            case 114: // json
-            case 3802: // jsonb
-                data.fields.push_back(fostlib::json::parse(str));
-                break;
-            case 1114: // timestamp without time zone
-                throw fostlib::exceptions::not_implemented(__FUNCTION__,
-                    "Timestamp fields without time zones are explicitly disabled. "
-                    "Fix your schema to use 'timestamp with time zone'");
-            default:
-#ifdef DEBUG
-                fostlib::log::warning(c_fost_pg)
-                    ("", "Postgres type decoding -- unknown type OID")
-                    ("name", rsp.column_names[data.size()])
-                    ("field_type_oid", rsp.column_meta[data.size()].field_type_oid)
-                    ("type_modifier", rsp.column_meta[data.size()].type_modifier)
-                    ("format_code", rsp.column_meta[data.size()].format_code)
-                    ("bytes", str.bytes())
-                    ("string", str);
-#endif
-            case 25: // text
-            case 1043: // varchar
-            case 1082: // date
-            case 1083: // time
-            case 1184: // timestamp with time zone
-            case 1700: // numeric
-            case 2950: // uuid
-                data.fields.push_back(json(string(str)));
-            }
-        } else {
-            throw exceptions::not_implemented(__func__, "Binary format");
-        }
-    }
+    rsp.decode_fields(data.fields, fields);
     return data.size();
 }
 

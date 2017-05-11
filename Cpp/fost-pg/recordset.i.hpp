@@ -21,8 +21,8 @@ namespace fostlib {
         struct recordset::impl {
             connection::impl &cnx;
 
-            impl(connection::impl &c)
-            : cnx(c), blocks(c.socket.get_io_service(), 50)  {
+            impl(connection::impl &c, std::size_t buffer_size = 3)
+            : cnx(c), blocks(c.socket.get_io_service(), buffer_size)  {
             }
 
             std::vector<fostlib::nullable<fostlib::string>> column_names;
@@ -40,6 +40,11 @@ namespace fostlib {
             f5::boost_asio::channel<pgasio::record_block> blocks;
             pgasio::array_view<const pgasio::byte_view> fields;
             nullable<pgasio::record_block> block;
+
+            void decode_fields(
+                std::vector<fostlib::json> &into,
+                pgasio::array_view<const pgasio::byte_view> fields);
+
         };
 
 
