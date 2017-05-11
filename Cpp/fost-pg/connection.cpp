@@ -51,6 +51,7 @@ fostlib::pg::connection::connection(const fostlib::json &dsn) {
             user.value_or(std::getenv("LOGNAME")).c_str(), database.value_or(""), yield));
     }));
     s.wait();
+    exec("BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE");
 }
 
 
@@ -72,6 +73,7 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
                 response(header, pimpl->socket, yield);
                 auto zed = pgasio::packet_header(pimpl->socket, yield);
                 if ( zed.type == 'Z' ) {
+                    response(zed, pimpl->socket, yield);
                     s->done();
                     return;
                 } else {
