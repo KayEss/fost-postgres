@@ -9,6 +9,7 @@
 #include "recordset.i.hpp"
 #include <f5/threading/sync.hpp>
 #include <fost/insert>
+#include <fost/log>
 #include <fost/parse/parse.hpp>
 #include <fost/exception/parse_error.hpp>
 #include <fost/pg/recordset.hpp>
@@ -100,7 +101,7 @@ namespace {
 void fostlib::pg::recordset::impl::decode_fields(
     std::vector<fostlib::json> &data,
     pgasio::array_view<const pgasio::byte_view> fields
-) {
+) const {
     for ( ; fields.size(); fields = fields.slice(1) ) {
         if ( fields[0].data() == nullptr ) {
             data.push_back(json());
@@ -164,7 +165,7 @@ fostlib::pg::recordset::const_iterator::const_iterator(fostlib::pg::recordset::i
     if ( begin ) {
         auto cols = rs.column_names.size();
         pimpl.reset(new impl{rs, record{cols}});
-        if ( rs.block ) {
+        if ( rs.record_block.size() ) {
             pimpl->decode_row();
         } else {
             pimpl->finished = true;
@@ -185,23 +186,18 @@ const fostlib::pg::record &fostlib::pg::recordset::const_iterator::operator * ()
 
 
 fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::operator ++ () {
-    if ( not pimpl->rsp.fields.size() ) {
-        if ( pimpl->rsp.fields.data() ) {
+    if ( not pimpl->rsp.records.size() ) {
+        if ( pimpl->rsp.record_block.size() ) {
             f5::sync s;
-            boost::asio::spawn(pimpl->rsp.blocks.get_io_service(), s([&](auto yield) {
-                pgasio::record_block block{pimpl->rsp.blocks.consume(yield)};
-                if ( block.fields().data() == nullptr ) {
-                    pimpl->finished = true;
-                    pimpl->rsp.block = null;
-                } else {
-                    pimpl->rsp.fields = block.fields();
-                    pimpl->rsp.block = std::move(block);
-                }
+            boost::asio::spawn(pimpl->rsp.records_data.get_io_service(), s([&](auto yield) {
+                auto recs{pimpl->rsp.records_data.consume(yield)};
+                if ( not recs.size() ) pimpl->finished = true;
+                pimpl->rsp.record_block = std::move(recs);
+                pimpl->rsp.records = pimpl->rsp.record_block;
             }));
             s.wait();
         } else {
             pimpl->finished = true;
-            pimpl->rsp.block = null;
         }
     }
     if ( not pimpl->finished ) pimpl->decode_row();
@@ -223,10 +219,8 @@ bool fostlib::pg::recordset::const_iterator::operator == (const const_iterator &
 
 
 std::size_t fostlib::pg::recordset::const_iterator::impl::decode_row() {
-    auto fields = rsp.fields.slice(0, rsp.column_meta.size());
-    rsp.fields = rsp.fields.slice(fields.size());
-    data.fields.clear();
-    rsp.decode_fields(data.fields, fields);
+    data.fields = std::move(rsp.records.data()[0]);
+    rsp.records = rsp.records.slice(1);
     return data.size();
 }
 

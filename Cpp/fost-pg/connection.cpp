@@ -79,17 +79,43 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
                         "Expected Z packet after recordset end (C) packet");
                 }
             } else if ( header.type == 'D' ) {
+                auto blocks = std::make_shared<f5::boost_asio::channel<pgasio::record_block>>(
+                    pimpl->socket.get_io_service(), 3);
                 pgasio::record_block block{rs->column_meta.size(), header.body_size, header.body_size};
                 auto next_block_size = block.read_rows(pimpl->socket, header.body_size, yield);
-                rs->fields = block.fields();
-                rs->block = std::move(block);
-                s->done();
+                boost::asio::spawn(pimpl->socket.get_io_service(),
+                    [s, rs, block = std::move(block), blocks](auto yield) mutable
+                {
+                    bool already_done = false;
+                    const auto columns = rs->column_meta.size();
+                    do {
+                        recordset::impl::record_data data;
+                        const std::size_t rows = block.fields().size() / columns;
+                        data.reserve(rows);
+                        for ( auto fields = block.fields(); fields.size(); fields = fields.slice(columns) ) {
+                            std::vector<fostlib::json> row;
+                            row.reserve(columns);
+                            rs->decode_fields(row, fields.slice(0, columns));
+                            data.push_back(std::move(row));
+                        }
+                        if ( not already_done) {
+                            rs->record_block = std::move(data);
+                            rs->records = rs->record_block;
+                            s->done();
+                            already_done = true;
+                        } else {
+                            rs->records_data.produce(std::move(data), yield);
+                        }
+                        block = blocks->consume(yield);
+                    } while ( block.fields().data() != nullptr );
+                    rs->records_data.produce(recordset::impl::record_data{}, yield);
+                });
                 while ( next_block_size ) {
                     pgasio::record_block block(rs->column_meta.size());
                     next_block_size = block.read_rows(pimpl->socket, next_block_size, yield);
-                    rs->blocks.produce(std::move(block), yield);
+                    blocks->produce(std::move(block), yield);
                 }
-                rs->blocks.produce(pgasio::record_block{}, yield);
+                blocks->produce(pgasio::record_block{}, yield);
                 return;
             } else if ( header.type == 'T' ) {
                 rs->row_description(response(header, pimpl->socket, yield));
