@@ -48,7 +48,7 @@ fostlib::pg::connection::connection(const fostlib::json &dsn) {
         auto const user = coerce<nullable<string>>(dsn["user"]);
         pimpl.reset(new impl(reactor().get_io_service(),
             host.value_or("/var/run/postgresql/.s.PGSQL.5432").c_str(),
-            user.value_or(std::getenv("LOGNAME")).c_str(), database.value_or(""), yield));
+            user.value_or(std::getenv("LOGNAME")).c_str(), database.value_or("").c_str(), yield));
     }));
     s.wait();
     exec("BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE");
@@ -65,7 +65,7 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
         [s = &s, this, &sql, rs=rsp.get()](auto yield)
     {
         command query{'Q'};
-        query.write(sql.underlying().c_str());
+        query.c_str(sql.underlying().c_str());
         query.send(pimpl->socket, yield);
         while ( true ) {
             auto header = pgasio::packet_header(pimpl->socket, yield);
@@ -134,47 +134,36 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
  */
 
 
+namespace {
+    auto connect(
+        boost::asio::io_service &ios, const char *loc, boost::asio::yield_context &yield
+    ) {
+        boost::asio::local::stream_protocol::socket socket{ios};
+        boost::asio::local::stream_protocol::endpoint ep(loc);
+        socket.async_connect(ep, yield);
+        return socket;
+    }
+}
 fostlib::pg::connection::impl::impl(
     boost::asio::io_service &ios, f5::lstring loc, boost::asio::yield_context &yield
-) : impl(ios, loc.c_str(), std::getenv("LOGNAME"), utf::u8_view(), yield) {
+) : impl(ios, loc.c_str(), std::getenv("LOGNAME"), "", yield) {
 }
 fostlib::pg::connection::impl::impl(
     boost::asio::io_service &ios, const char *loc, const char *user,
-    utf::u8_view database, boost::asio::yield_context &yield
-) : socket(ios)
+    const char *database, boost::asio::yield_context &yield
+) : cnx(pgasio::handshake(connect(ios, loc, yield), user, database, yield)),
+    socket(cnx.socket)
 {
     auto logger = fostlib::log::info(c_fost_pg);
     logger
+        ("", "Connected to unix domain socket")
         ("path", loc)
         ("dbname", database)
-        ("user", user);
-    boost::asio::local::stream_protocol::endpoint ep(loc);
-    socket.async_connect(ep, yield);
-    logger("", "Connected to unix domain socket");
-    command cmd;
-    cmd.write(int32_t{0x0003'0000});
-    cmd.write("user").write(user);
-    if ( database.bytes() ) cmd.write("database").write(database);
-    cmd.byte(char{});
-    cmd.send(socket, yield);
-    while ( true ) {
-        auto reply{read(yield)};
-        decoder decode(reply);
-        if ( reply.header.type == 'K' ) {
-            logger("cancellation", "process-id", decode.read_int32());
-            logger("cancellation", "secret", decode.read_int32());
-        } else if ( reply.header.type == 'R' ) {
-            logger("authentication", "ok");
-        } else if ( reply.header.type == 'S' ) {
-            const auto name = decode.read_string();
-            const auto value = decode.read_string();
-            logger("setting", name, value);
-        } else if ( reply.header.type == 'Z' ) {
-            logger("", "Connected to Postgres");
-            return;
-        } else {
-            throw fostlib::exceptions::not_implemented(__func__, reply.code());
-        }
+        ("user", user)
+        ("cancellation", "process-id", cnx.process_id)
+        ("cancellation", "secret", cnx.secret);
+    for ( const auto &setting : cnx.settings  ) {
+        logger("setting", setting.first.c_str(), utf::u8_view(setting.second));
     }
 }
 
@@ -206,46 +195,13 @@ fostlib::pg::response fostlib::pg::connection::impl::read(boost::asio::yield_con
  */
 
 
-fostlib::pg::command::command() {
+fostlib::pg::command::command()
+: pgasio::command(0) {
 }
 
 
-fostlib::pg::command::command(char c) {
-    header.sputc(c);
-}
-
-
-fostlib::pg::command &fostlib::pg::command::write(const char *s) {
-    while (*s) {
-        byte(*s++);
-    }
-    byte(char{});
-    return *this;
-}
-
-
-fostlib::pg::command &fostlib::pg::command::write(utf::u8_view str) {
-    for ( std::size_t index{}; index < str.bytes(); ++index )
-        byte(str.data()[index]);
-    byte(char{});
-    return *this;
-}
-
-
-void fostlib::pg::command::send(
-    boost::asio::local::stream_protocol::socket &socket, boost::asio::yield_context &yield
-) {
-    const auto bytes{coerce<uint32_t>(4 + buffer.size())};
-    const auto send = boost::endian::native_to_big(bytes);
-    header.sputn(reinterpret_cast<const char*>(&send), 4);
-    std::array<boost::asio::streambuf::const_buffers_type, 2>
-        data{{header.data(), buffer.data()}};
-    fostlib::log::debug(c_fost_pg)
-        ("", "Sending data to Postgres")
-        ("size", "bytes", bytes)
-        ("size", "header", header.size())
-        ("size", "body", buffer.size());
-    async_write(socket, data, yield);
+fostlib::pg::command::command(char c)
+: pgasio::command(c) {
 }
 
 
