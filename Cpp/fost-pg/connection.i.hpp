@@ -11,7 +11,6 @@
 #include <pgasio/connection.hpp>
 #include <fost/unicode>
 
-#include <boost/asio/local/stream_protocol.hpp>
 #include <boost/asio/spawn.hpp>
 #include <boost/asio/streambuf.hpp>
 #include <boost/endian/conversion.hpp>

@@ -134,16 +134,6 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
  */
 
 
-namespace {
-    auto connect(
-        boost::asio::io_service &ios, const char *loc, boost::asio::yield_context &yield
-    ) {
-        boost::asio::local::stream_protocol::socket socket{ios};
-        boost::asio::local::stream_protocol::endpoint ep(loc);
-        socket.async_connect(ep, yield);
-        return socket;
-    }
-}
 fostlib::pg::connection::impl::impl(
     boost::asio::io_service &ios, f5::lstring loc, boost::asio::yield_context &yield
 ) : impl(ios, loc.c_str(), std::getenv("LOGNAME"), "", yield) {
@@ -151,7 +141,7 @@ fostlib::pg::connection::impl::impl(
 fostlib::pg::connection::impl::impl(
     boost::asio::io_service &ios, const char *loc, const char *user,
     const char *database, boost::asio::yield_context &yield
-) : cnx(pgasio::handshake(connect(ios, loc, yield), user, database, yield)),
+) : cnx(pgasio::handshake(pgasio::unix_domain_socket(ios, loc, yield), user, database, yield)),
     socket(cnx.socket)
 {
     auto logger = fostlib::log::info(c_fost_pg);
