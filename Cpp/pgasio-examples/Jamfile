@@ -1,0 +1,28 @@
+include $(TOP)/../fost-base/fost.jam ;
+import path ;
+import utility ;
+
+
+loc = $(TOP)/../fost-postgres/pgasio/examples/low-level/ ;
+
+rule sample ( name ) {
+    fost-exe $(name)
+        :
+            $(TOP)/../Boost//boost-coroutine-dll
+            $(loc)$(name).cpp
+        :
+            <define>BOOST_COROUTINES_NO_DEPRECATION_WARNING
+            <define>BOOST_COROUTINE_NO_DEPRECATION_WARNING
+            <cxxflags>-Wno-delete-non-virtual-dtor
+            <cxxflags>-Wno-unused-variable
+        ;
+}
+
+for local cpp in [ path.glob $(loc) : *.cpp ] {
+    sample [ utility.basename $(cpp) ] ;
+}
+
+# fost-install $(TOP)/../Boost//boost-chrono-dll ;
+# fost-install $(TOP)/../Boost//boost-context-dll ;
+fost-install $(TOP)/../Boost//boost-coroutine-dll ;
+

@@ -30,6 +30,11 @@ alias fost :
         Cpp/select
     ;
 
+alias examples :
+        Cpp/pgasio-examples
+    ;
+explicit examples ;
+
 alias tests :
         ../fost-base//tests
         ../fost-orm//tests
@@ -40,7 +45,9 @@ alias tests :
 explicit tests ;
 
 alias all :
+        examples
         fost
         tests
     ;
 explicit all ;
+
