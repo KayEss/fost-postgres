@@ -3,7 +3,7 @@ import path ;
 import utility ;
 
 
-loc = $(TOP)/../fost-postgres/pgasio/examples/low-level/ ;
+loc = $(TOP)/../fost-postgres/pgasio/examples/ ;
 
 rule sample ( name ) {
     fost-exe $(name)
