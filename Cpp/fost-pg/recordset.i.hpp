@@ -9,7 +9,7 @@
 #pragma once
 
 #include "connection.i.hpp"
-#include <pgasio/recordset.hpp>
+#include <pgasio/record_block.hpp>
 #include <fost/pg/recordset.hpp>
 #include <f5/threading/channel.hpp>
 
