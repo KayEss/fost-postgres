@@ -5,11 +5,11 @@ import utility ;
 
 loc = $(TOP)/../fost-postgres/pgasio/examples/ ;
 
-rule sample ( name ) {
+rule sample ( name : pre ) {
     fost-exe $(name)
         :
             $(TOP)/../Boost//boost-coroutine-dll
-            $(loc)$(name).cpp
+            $(loc)$(pre)$(name).cpp
         :
             <define>BOOST_COROUTINES_NO_DEPRECATION_WARNING
             <define>BOOST_COROUTINE_NO_DEPRECATION_WARNING
@@ -19,7 +19,10 @@ rule sample ( name ) {
 }
 
 for local cpp in [ path.glob $(loc) : *.cpp ] {
-    sample [ utility.basename $(cpp) ] ;
+    sample [ utility.basename $(cpp) ] : "" ;
+}
+for local cpp in [ path.glob $(loc)/f5 : *.cpp ] {
+    sample [ utility.basename $(cpp) ] : f5/ ;
 }
 
 # fost-install $(TOP)/../Boost//boost-chrono-dll ;
