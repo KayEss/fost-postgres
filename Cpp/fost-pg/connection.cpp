@@ -68,17 +68,17 @@ fostlib::pg::recordset fostlib::pg::connection::exec(const utf8_string &sql) {
         query.c_str(sql.underlying().c_str());
         query.send(pimpl->socket, yield);
         while ( true ) {
-            auto header = pgasio::packet_header(pimpl->socket, yield);
+            auto header = pgasio::message_header(pimpl->socket, yield);
             if ( header.type == 'C' ) {
                 response(header, pimpl->socket, yield);
-                auto zed = pgasio::packet_header(pimpl->socket, yield);
+                auto zed = pgasio::message_header(pimpl->socket, yield);
                 if ( zed.type == 'Z' ) {
                     response(zed, pimpl->socket, yield);
                     s->done();
                     return;
                 } else {
                     throw exceptions::not_implemented(__func__,
-                        "Expected Z packet after recordset end (C) packet");
+                        "Expected Z message after recordset end (C) message");
                 }
             } else if ( header.type == 'D' ) {
                 const auto columns = rs->column_meta.size();
@@ -160,7 +160,7 @@ fostlib::pg::connection::impl::impl(
 
 fostlib::pg::response fostlib::pg::connection::impl::read(boost::asio::yield_context &yield) {
     try {
-        const auto header = pgasio::packet_header(socket, yield);
+        const auto header = pgasio::message_header(socket, yield);
         fostlib::log::debug(c_fost_pg)
             ("", "Read length and control byte")
             ("code", string() + header.type)

@@ -81,7 +81,7 @@ namespace fostlib {
             }
             template<typename S>
             response(pgasio::header h, S &socket, boost::asio::yield_context&yield)
-            : header{h}, body{h.packet_body(socket, yield)} {
+            : header{h}, body{h.message_body(socket, yield)} {
             }
 
             ~response();
