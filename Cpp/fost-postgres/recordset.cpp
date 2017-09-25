@@ -137,14 +137,18 @@ namespace {
                         "Timestamp fields without time zones are explicitly disabled. "
                         "Fix your schema to use 'timestamp with time zone'");
                 default:
+#ifdef DEBUG
                     fostlib::log::warning(fostlib::pg::c_fost_pg)
                         ("", "Postgres type decoding -- unknown type OID")
                         ("oid", types[index]);
+#endif
                 case 25: // text
                 case 1043: // varchar
                 case 1082: // date
                 case 1083: // time
                 case 1184: // timestamp with time zone
+                case 1700: // numeric
+                case 2950: // uuid
                     fields[index] = fostlib::coerce<fostlib::json>(pos[index].c_str());
                 }
             }
