@@ -79,7 +79,10 @@ namespace fostlib {
             /// Performa one row UPDATE statement. Give the keys and values
             connection &update(const char *relation, const json &keys, const json &values);
             /// Perform an UPSERT (INSERT/CONFLICT). Give the keys and values
+            /// and optionally a returning list
             connection &upsert(const char *relation, const json &keys, const json &values);
+            recordset upsert(const char *relation, const json &keys, const json &values,
+                const std::vector<fostlib::string> &returning);
 
             /// Create an anonymous stored procedure
             unbound_procedure procedure(const utf8_string &);

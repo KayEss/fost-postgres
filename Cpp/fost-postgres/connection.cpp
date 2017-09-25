@@ -108,6 +108,7 @@ void fostlib::pg::connection::commit() {
 
 
 namespace {
+
     inline fostlib::string column(const fostlib::json &name) {
         return fostlib::coerce<fostlib::string>(name);
     }
@@ -150,6 +151,19 @@ namespace {
     fostlib::string value_string(T &t, const fostlib::json &def) {
         return value_string(t, fostlib::string(), def);
     }
+
+    fostlib::string returning_vals(const std::vector<fostlib::string> &returning) {
+        fostlib::string ret_vals;
+        for ( const auto &s : returning ) {
+            if ( ret_vals.empty() ) {
+                ret_vals = s;
+            } else {
+                ret_vals += ", " + s;
+            }
+        }
+        return ret_vals;
+    }
+
 }
 
 
@@ -206,14 +220,7 @@ fostlib::pg::connection &fostlib::pg::connection::insert(const char *relation, c
 fostlib::pg::recordset fostlib::pg::connection::insert(
     const char *relation, const json &values, const std::vector<fostlib::string> &returning
 ) {
-    string ret_vals;
-    for ( const auto &s : returning ) {
-        if ( ret_vals.empty() ) {
-            ret_vals = s;
-        } else {
-            ret_vals += ", " + s;
-        }
-    }
+    auto ret_vals{returning_vals(returning)};
     return exec(coerce<utf8_string>(
         string("INSERT INTO ") + relation +
             " (" + columns(values) + ") VALUES (" + value_string(*pimpl->trans, values) + ") "
@@ -250,6 +257,13 @@ fostlib::pg::connection &fostlib::pg::connection::update(
 fostlib::pg::connection &fostlib::pg::connection::upsert(
     const char *relation, const json &keys, const json &values
 ) {
+    upsert(relation, keys, values, {});
+    return *this;
+}
+fostlib::pg::recordset fostlib::pg::connection::upsert(
+    const char *relation, const json &keys, const json &values,
+    const std::vector<fostlib::string> &returning
+) {
     string sql("INSERT INTO "),
         key_names(columns(keys)),
         value_names(columns(key_names, values)),
@@ -270,8 +284,11 @@ fostlib::pg::connection &fostlib::pg::connection::upsert(
     } else {
         sql += "UPDATE SET " + updates;
     }
-    exec(coerce<utf8_string>(sql));
-    return *this;
+    if ( returning.size() ) {
+        auto ret_vals{returning_vals(returning)};
+        sql += " RETURNING " + ret_vals;
+    }
+    return exec(coerce<utf8_string>(sql));
 }
 
 
