@@ -285,7 +285,7 @@ fostlib::pg::recordset fostlib::pg::connection::upsert(
         sql += "UPDATE SET " + updates;
     }
     if ( returning.size() ) {
-        auto ret_vals{returning_vals(returning)};
+        auto ret_vals = returning_vals(returning);
         sql += " RETURNING " + ret_vals;
     }
     return exec(coerce<utf8_string>(sql));
