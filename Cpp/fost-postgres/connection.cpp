@@ -220,7 +220,7 @@ fostlib::pg::connection &fostlib::pg::connection::insert(const char *relation, c
 fostlib::pg::recordset fostlib::pg::connection::insert(
     const char *relation, const json &values, const std::vector<fostlib::string> &returning
 ) {
-    auto ret_vals{returning_vals(returning)};
+    auto ret_vals = returning_vals(returning);
     return exec(coerce<utf8_string>(
         string("INSERT INTO ") + relation +
             " (" + columns(values) + ") VALUES (" + value_string(*pimpl->trans, values) + ") "
