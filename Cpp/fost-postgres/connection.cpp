@@ -174,7 +174,7 @@ fostlib::pg::connection &fostlib::pg::connection::zoneinfo(const string &zi) {
 
 
 fostlib::pg::connection &fostlib::pg::connection::set_session(const string &n, const string &v) {
-    exec("SET " + n.std_str() + " = " + pimpl->trans->quote(v.std_str()));
+    exec("SET \"" + n.std_str() + "\" = " + pimpl->trans->quote(v.std_str()));
     return *this;
 }
 
