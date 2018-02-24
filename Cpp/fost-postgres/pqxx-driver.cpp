@@ -1,5 +1,5 @@
 /*
-    Copyright 2008-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2008-2019, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -13,6 +13,7 @@
 
 #include <pqxx/connection>
 #include <pqxx/nontransaction>
+#include <pqxx/result>
 #include <pqxx/row>
 #include <pqxx/transaction>
 
@@ -50,10 +51,11 @@ namespace {
     class pqRead : public fostlib::dbinterface::read {
         pqxx::connection m_pqcon;
     public:
+        // TODO Convert to use a move to replace the pqxx::work
         boost::scoped_ptr< pqxx::work > m_transaction;
 
         pqRead( fostlib::dbconnection &d )
-        : read( d ), m_pqcon( fostlib::coerce< fostlib::utf8_string >( d.configuration()[ L"read" ].get< fostlib::string >().value() ).underlying().c_str() ) {
+        : read( d ), m_pqcon(std::string(fostlib::coerce<f5::u8view>(d.configuration()["read"]))) {
             transaction();
         }
         ~pqRead()
@@ -163,11 +165,9 @@ namespace {
         pqWrite( fostlib::dbconnection &dbc, pqRead &reader )
         : write( reader ), m_reader( reader ) {
             m_reader.m_transaction.reset();
-            m_pqcon.reset( new pqxx::connection(
-                fostlib::coerce< fostlib::utf8_string >(
-                    dbc.configuration()[ L"write" ].get< fostlib::string >().value()
-                ).underlying()
-            ) );
+            m_pqcon.reset(new pqxx::connection(
+                std::string(fostlib::coerce<f5::u8view>(
+                    dbc.configuration()["write"]))));
             m_transaction.reset( new pqxx::work( *m_pqcon ) );
         }
 
@@ -211,18 +211,16 @@ namespace {
 
 void pqInterface::create_database( fostlib::dbconnection &dbc, const fostlib::string &name ) const {
     pqxx::connection con(
-        fostlib::coerce< fostlib::utf8_string >( dbc.configuration()[ L"write" ].get< fostlib::string >().value() ).underlying()
-    );
-    pqxx::nontransaction tran( con );
+        std::string(fostlib::coerce<f5::u8view>(dbc.configuration()["write"])));
+    pqxx::nontransaction tran(con);
     tran.exec( "CREATE DATABASE \"" + fostlib::coerce< fostlib::utf8_string >( name ).underlying() + "\"" );
 }
 
 
 void pqInterface::drop_database( fostlib::dbconnection &dbc, const fostlib::string &name ) const {
-    pqxx::connection con( fostlib::coerce< fostlib::utf8_string >(
-        dbc.configuration()[ L"write" ].get< fostlib::string >().value()
-    ).underlying() );
-    pqxx::nontransaction tran( con );
+    pqxx::connection con(
+        std::string(fostlib::coerce<f5::u8view>(dbc.configuration()["write"])));
+    pqxx::nontransaction tran(con);
     tran.exec( "DROP DATABASE \"" + fostlib::coerce< fostlib::utf8_string >( name ).underlying() + "\"" );
 }
 
