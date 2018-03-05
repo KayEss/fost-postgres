@@ -1,5 +1,5 @@
 /*
-    Copyright 2015-2016, Felspar Co Ltd. http://support.felspar.com/
+    Copyright 2015-2018, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
     See accompanying file LICENSE_1_0.txt or copy at
         http://www.boost.org/LICENSE_1_0.txt
@@ -11,6 +11,7 @@
 
 #include <fost/pg/recordset.hpp>
 #include "connection.hpp"
+#include <pqxx/result>
 
 
 struct fostlib::pg::recordset::impl {
