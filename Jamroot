@@ -8,11 +8,6 @@ fost-project fost-postgres :
         <include>../fost-orm/Cpp/include
         <include>../PostgreSQL/pqxx/include
 
-        <target-os>darwin:<include>/Library/PostgreSQL/8.4/include/
-        <target-os>darwin:<library-path>/Library/PostgreSQL/8.4/lib/
-        <target-os>darwin:<library-path>/Library/PostgreSQL/9.1/lib/
-        <target-os>darwin:<library-path>/usr/local/pgsql/lib/
-
         <target-os>windows:<include>../PostgreSQL/libpqxx/config/sample-headers/libpq/8.3
         <target-os>windows:<include>../PostgreSQL/libpqxx/config/sample-headers/compiler/VisualC++.NET-2003
         <target-os>windows:<include>"C:/Program Files/PostgreSQL/8.3/include"
