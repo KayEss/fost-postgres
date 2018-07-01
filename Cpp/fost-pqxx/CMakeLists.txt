@@ -27,6 +27,7 @@ add_library(fost-pqxx
         ../../../PostgreSQL/pqxx/src/util.cxx
         ../../../PostgreSQL/pqxx/src/version.cxx
     )
+target_compile_options(fost-pqxx PUBLIC -std=c++14)
 target_include_directories(fost-pqxx
         PUBLIC ../../../PostgreSQL/pqxx/include/
         PRIVATE /usr/include/postgresql/
