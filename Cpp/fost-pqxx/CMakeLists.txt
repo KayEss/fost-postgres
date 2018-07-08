@@ -1,3 +1,7 @@
+## If this fails you may need more packages. Although libpqxx only needs
+## `libpq-dev` the cmake module also looks for `postgresql-server-dev-all`
+find_package(PostgreSQL REQUIRED)
+
 add_library(fost-pqxx
         ../../../PostgreSQL/pqxx/src/array.cxx
         ../../../PostgreSQL/pqxx/src/binarystring.cxx
@@ -30,8 +34,9 @@ add_library(fost-pqxx
 target_compile_options(fost-pqxx PUBLIC -std=c++14)
 target_include_directories(fost-pqxx
         PUBLIC ../../../PostgreSQL/pqxx/include/
-        PRIVATE /usr/include/postgresql/
+        PRIVATE ${PostgreSQL_INCLUDE_DIRS}
     )
-target_link_libraries(fost-pqxx pq)
+target_link_libraries(fost-pqxx ${PostgreSQL_LIBRARIES})
 set_target_properties(fost-pqxx PROPERTIES DEBUG_POSTFIX "-d")
 install(TARGETS fost-pqxx LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+
