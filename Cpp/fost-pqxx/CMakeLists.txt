@@ -33,4 +33,5 @@ target_include_directories(fost-pqxx
         PRIVATE /usr/include/postgresql/
     )
 target_link_libraries(fost-pqxx pq)
+set_target_properties(fost-pqxx PROPERTIES DEBUG_POSTFIX "-d")
 install(TARGETS fost-pqxx LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
