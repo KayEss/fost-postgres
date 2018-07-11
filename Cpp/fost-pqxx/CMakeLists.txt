@@ -31,11 +31,17 @@ add_library(fost-pqxx
         ../../../PostgreSQL/pqxx/src/util.cxx
         ../../../PostgreSQL/pqxx/src/version.cxx
     )
-target_compile_options(fost-pqxx PUBLIC -std=c++14)
 target_include_directories(fost-pqxx
         PUBLIC ../../../PostgreSQL/pqxx/include/
         PRIVATE ${PostgreSQL_INCLUDE_DIRS}
     )
+if(CMAKE_VERSION VERSION_LESS "3.8")
+    message(WARNING "This verison of cmake is too old to request C++17 for fost-pqxx")
+    target_compile_options(fost-pqxx PUBLIC -std=c++17)
+else()
+    target_compile_features(fost-pqxx PUBLIC cxx_std_17)
+endif()
+
 target_link_libraries(fost-pqxx ${PostgreSQL_LIBRARIES})
 set_target_properties(fost-pqxx PROPERTIES DEBUG_POSTFIX "-d")
 install(TARGETS fost-pqxx LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
