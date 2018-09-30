@@ -2,7 +2,7 @@
 ## `libpq-dev` the cmake module also looks for `postgresql-server-dev-all`
 find_package(PostgreSQL REQUIRED)
 
-add_library(fost-pqxx
+add_library(fost-pqxx STATIC
         ../../../PostgreSQL/pqxx/src/array.cxx
         ../../../PostgreSQL/pqxx/src/binarystring.cxx
         ../../../PostgreSQL/pqxx/src/connection_base.cxx
@@ -31,8 +31,10 @@ add_library(fost-pqxx
         ../../../PostgreSQL/pqxx/src/util.cxx
         ../../../PostgreSQL/pqxx/src/version.cxx
     )
-target_include_directories(fost-pqxx
+target_include_directories(fost-pqxx BEFORE
         PUBLIC ../../../PostgreSQL/pqxx/include/
+    )
+target_include_directories(fost-pqxx
         PRIVATE ${PostgreSQL_INCLUDE_DIRS}
     )
 if(CMAKE_VERSION VERSION_LESS "3.8")
