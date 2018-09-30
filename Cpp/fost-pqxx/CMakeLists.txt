@@ -31,6 +31,7 @@ add_library(fost-pqxx STATIC
         ../../../PostgreSQL/pqxx/src/util.cxx
         ../../../PostgreSQL/pqxx/src/version.cxx
     )
+target_compile_options(fost-pqxx PRIVATE -fPIC)
 target_include_directories(fost-pqxx BEFORE
         PUBLIC ../../../PostgreSQL/pqxx/include/
     )
