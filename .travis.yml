@@ -37,4 +37,5 @@ script:
     - cmake . -DCMAKE_BUILD_TYPE=$CMAKE_BUILD_TYPE -G Ninja
     - ninja
     - ninja check
+    - ninja pgtest
 
