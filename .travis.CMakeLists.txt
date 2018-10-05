@@ -8,3 +8,5 @@ add_subdirectory(fost-base)
 add_subdirectory(libpqxx)
 add_subdirectory(.. fost-postgres)
 
+# Temporary hack...
+target_include_directories(unit_runner PRIVATE ${PostgreSQL_INCLUDE_DIRS})
