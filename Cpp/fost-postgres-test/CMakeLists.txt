@@ -4,3 +4,4 @@ add_library(fost-postgres-test STATIC EXCLUDE_FROM_ALL
     )
 target_link_libraries(fost-postgres-test fost-postgres)
 stress_test(fost-postgres-test)
+add_dependencies(pgtest fost-postgres-test-check)
