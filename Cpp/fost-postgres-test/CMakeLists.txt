@@ -1,4 +1,4 @@
-if(TARGET stress)
+if(TARGET stress AND TARGET pgtest)
     add_library(fost-postgres-test STATIC EXCLUDE_FROM_ALL
             config.cpp
             pg.cpp
