@@ -32,7 +32,8 @@ namespace fostlib {
             friend class unbound_procedure;
             struct impl;
             std::unique_ptr<impl> pimpl;
-        public:
+
+          public:
             /// A default connection without host or password
             connection();
             /// Connect to a specified host without specifying a password
@@ -62,27 +63,36 @@ namespace fostlib {
             /// Configuration options
             connection &zoneinfo(const fostlib::string &zi);
             /// Set a setting for this session
-            connection &set_session(const fostlib::string &s, const fostlib::string &v);
+            connection &set_session(
+                    const fostlib::string &s, const fostlib::string &v);
 
             /// Return a recordset range from the execution of the command
             recordset exec(const utf8_string &);
-            /// Select statement intended for fetching individual row, or collections
+            /// Select statement intended for fetching individual row, or
+            /// collections
             recordset select(const char *relation, const json &keys);
-            recordset select(const char *relation, const json &keys, const json &order);
-            /// Perform a one row INSERT statement. Pass a JSON object that specifies
-            /// the field names and values
+            recordset select(
+                    const char *relation, const json &keys, const json &order);
+            /// Perform a one row INSERT statement. Pass a JSON object that
+            /// specifies the field names and values
             connection &insert(const char *relation, const json &values);
             /// Insert using a RETURNING clause so we return a recordset
-            recordset insert(
-                const char *relation, const json &values,
-                const std::vector<fostlib::string> &returning);
+            recordset
+                    insert(const char *relation,
+                           const json &values,
+                           const std::vector<fostlib::string> &returning);
             /// Performa one row UPDATE statement. Give the keys and values
-            connection &update(const char *relation, const json &keys, const json &values);
+            connection &update(
+                    const char *relation, const json &keys, const json &values);
             /// Perform an UPSERT (INSERT/CONFLICT). Give the keys and values
             /// and optionally a returning list
-            connection &upsert(const char *relation, const json &keys, const json &values);
-            recordset upsert(const char *relation, const json &keys, const json &values,
-                const std::vector<fostlib::string> &returning);
+            connection &upsert(
+                    const char *relation, const json &keys, const json &values);
+            recordset
+                    upsert(const char *relation,
+                           const json &keys,
+                           const json &values,
+                           const std::vector<fostlib::string> &returning);
 
             /// Create an anonymous stored procedure
             unbound_procedure procedure(const utf8_string &);
@@ -100,4 +110,3 @@ namespace fostlib {
 
 
 }
-

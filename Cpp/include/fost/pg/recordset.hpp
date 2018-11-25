@@ -33,9 +33,9 @@ namespace fostlib {
             recordset(std::unique_ptr<impl> &&p);
             recordset(connection::impl &, const utf8_string &);
 
-        public:
+          public:
             /// Allow move
-            recordset(recordset&&);
+            recordset(recordset &&);
             /// Allow public desctruction
             ~recordset();
 
@@ -44,12 +44,12 @@ namespace fostlib {
 
             /// The recordset iterator
             class const_iterator :
-                public std::iterator<std::input_iterator_tag, record>
-            {
+            public std::iterator<std::input_iterator_tag, record> {
                 struct impl;
                 std::unique_ptr<impl> pimpl;
-                const_iterator(recordset::impl&, bool);
-            public:
+                const_iterator(recordset::impl &, bool);
+
+              public:
                 /// Default construct needs to be allowed
                 const_iterator();
                 /// Allow copying
@@ -58,24 +58,24 @@ namespace fostlib {
                 ~const_iterator();
 
                 /// Compare for equality
-                bool operator == (const const_iterator &) const;
+                bool operator==(const const_iterator &) const;
                 /// Compare for inequality
-                bool operator != (const const_iterator &ci) const {
-                    return not (*this == ci);
+                bool operator!=(const const_iterator &ci) const {
+                    return not(*this == ci);
                 }
 
                 /// Dereference the iterator
-                const record *operator -> () const;
+                const record *operator->() const;
                 /// Dereference the iterator
-                const record &operator * () const;
+                const record &operator*() const;
 
                 /// Make assignable
-                const_iterator &operator = (const const_iterator &);
+                const_iterator &operator=(const const_iterator &);
 
                 /// Move to the next row
-                const_iterator &operator ++ ();
+                const_iterator &operator++();
                 /// Move to the next row
-                const_iterator operator ++ (int);
+                const_iterator operator++(int);
 
                 friend class recordset;
             };
@@ -95,14 +95,12 @@ namespace fostlib {
             std::vector<json> fields;
             record(std::size_t);
 
-        public:
+          public:
             /// The number of columns
-            std::size_t size() const {
-                return fields.size();
-            }
+            std::size_t size() const { return fields.size(); }
 
             /// Return the value in the specified field number
-            const json &operator [] (std::size_t index) const {
+            const json &operator[](std::size_t index) const {
                 return fields[index];
             }
 
@@ -119,4 +117,3 @@ namespace fostlib {
 
 
 }
-

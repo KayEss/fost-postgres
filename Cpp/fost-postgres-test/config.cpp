@@ -12,13 +12,15 @@
 using namespace fostlib;
 
 
-const setting< string > read_dsn(
-    L"fost-postgres-test/basic.cpp",
-    L"Postgres tests", L"Read connection", L"pqxx/",
-    true );
-const setting< string > write_dsn(
-    L"fost-postgres-test/basic.cpp",
-    L"Postgres tests", L"Write connection", L"pqxx/",
-    true );
-
-
+const setting<string> read_dsn(
+        L"fost-postgres-test/basic.cpp",
+        L"Postgres tests",
+        L"Read connection",
+        L"pqxx/",
+        true);
+const setting<string> write_dsn(
+        L"fost-postgres-test/basic.cpp",
+        L"Postgres tests",
+        L"Write connection",
+        L"pqxx/",
+        true);
