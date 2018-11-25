@@ -9,6 +9,5 @@
 #include <fost/core>
 
 
-extern const fostlib::setting< fostlib::string > read_dsn;
-extern const fostlib::setting< fostlib::string > write_dsn;
-
+extern const fostlib::setting<fostlib::string> read_dsn;
+extern const fostlib::setting<fostlib::string> write_dsn;

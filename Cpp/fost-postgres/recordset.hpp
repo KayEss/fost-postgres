@@ -21,18 +21,16 @@ struct fostlib::pg::recordset::impl {
 
     impl(pqxx::result &&recs)
     : records(std::move(recs)),
-        types(records.columns()),
-        names(records.columns())
-    {
-        for ( pqxx::row::size_type index{0}; index != types.size(); ++index ) {
+      types(records.columns()),
+      names(records.columns()) {
+        for (pqxx::row::size_type index{0}; index != types.size(); ++index) {
             types[index] = records.column_type(index);
             names[index] = records.column_name(index);
         }
     }
 
     impl(connection::impl &cnx, const utf8_string &sql)
-    : impl(cnx.trans->exec(sql.underlying())) {
-    }
+    : impl(cnx.trans->exec(sql.underlying())) {}
 };
 
 
@@ -42,10 +40,9 @@ struct fostlib::pg::recordset::const_iterator::impl {
     record row;
 
     impl(pqxx::result::const_iterator pos, std::size_t cols)
-    : rs(nullptr), position(pos), row(cols) {
-    }
-    impl(fostlib::pg::recordset::impl *rs, pqxx::result::const_iterator pos, std::size_t cols)
-    : rs(rs), position(pos), row(cols) {
-    }
+    : rs(nullptr), position(pos), row(cols) {}
+    impl(fostlib::pg::recordset::impl *rs,
+         pqxx::result::const_iterator pos,
+         std::size_t cols)
+    : rs(rs), position(pos), row(cols) {}
 };
-

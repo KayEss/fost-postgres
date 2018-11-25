@@ -28,7 +28,8 @@ namespace fostlib {
             connection &cnx;
 
             unbound_procedure(connection &, std::string);
-        public:
+
+          public:
             const std::string name;
 
             recordset exec(const std::vector<fostlib::string> &args);
@@ -40,4 +41,3 @@ namespace fostlib {
 
 
 }
-

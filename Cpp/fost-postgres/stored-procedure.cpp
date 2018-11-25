@@ -13,28 +13,23 @@
 
 
 fostlib::pg::unbound_procedure::unbound_procedure(
-    fostlib::pg::connection &c, std::string n
-) : cnx(c), name(n)
-{
-}
+        fostlib::pg::connection &c, std::string n)
+: cnx(c), name(n) {}
 
 
 fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
-    const std::vector<fostlib::string> &args
-) {
+        const std::vector<fostlib::string> &args) {
     auto sp = cnx.pimpl->trans->prepared(name);
-    for ( const auto &a : args )
-        sp(a.std_str());
+    for (const auto &a : args) sp(a.std_str());
     return recordset(std::make_unique<recordset::impl>(sp.exec()));
 }
 
 
 fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
-    const std::vector<fostlib::json> &args
-) {
+        const std::vector<fostlib::json> &args) {
     auto sp = cnx.pimpl->trans->prepared(name);
-    for ( const auto &a : args ) {
-        if ( a.isnull() ) {
+    for (const auto &a : args) {
+        if (a.isnull()) {
             sp();
         } else {
             sp(fostlib::coerce<fostlib::string>(a).c_str());
@@ -42,4 +37,3 @@ fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
     }
     return recordset(std::make_unique<recordset::impl>(sp.exec()));
 }
-

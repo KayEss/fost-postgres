@@ -32,7 +32,7 @@ FSL_TEST_FUNCTION(connect_default) {
 
 FSL_TEST_FUNCTION(connect_specified) {
     const char *pghost = std::getenv("PGHOST");
-    if ( pghost == nullptr ) pghost = "/var/run/postgresql";
+    if (pghost == nullptr) pghost = "/var/run/postgresql";
     fostlib::pg::connection cnx(pghost);
     auto records = cnx.exec("SELECT 1");
     auto record = records.begin();
@@ -53,28 +53,16 @@ namespace {
         FSL_CHECK(++records.begin() == records.end());
     }
 }
-FSL_TEST_FUNCTION(type_null) {
-    check("SELECT NULL", fostlib::json());
-}
+FSL_TEST_FUNCTION(type_null) { check("SELECT NULL", fostlib::json()); }
 FSL_TEST_FUNCTION(type_bool) {
     check("SELECT 't'::bool", true);
     check("SELECT 'f'::bool", false);
 }
-FSL_TEST_FUNCTION(type_int2) {
-    check("SELECT 1::int2", 1);
-}
-FSL_TEST_FUNCTION(type_int4) {
-    check("SELECT 1::int4", 1);
-}
-FSL_TEST_FUNCTION(type_int8) {
-    check("SELECT 1::int8", 1);
-}
-FSL_TEST_FUNCTION(type_float4) {
-    check("SELECT 1::float4", 1.0);
-}
-FSL_TEST_FUNCTION(type_float8) {
-    check("SELECT 1::float8", 1.0);
-}
+FSL_TEST_FUNCTION(type_int2) { check("SELECT 1::int2", 1); }
+FSL_TEST_FUNCTION(type_int4) { check("SELECT 1::int4", 1); }
+FSL_TEST_FUNCTION(type_int8) { check("SELECT 1::int8", 1); }
+FSL_TEST_FUNCTION(type_float4) { check("SELECT 1::float4", 1.0); }
+FSL_TEST_FUNCTION(type_float8) { check("SELECT 1::float8", 1.0); }
 FSL_TEST_FUNCTION(type_json) {
     check("SELECT 'null'::json", fostlib::json());
     check("SELECT 'true'::json", true);
@@ -101,4 +89,3 @@ FSL_TEST_FUNCTION(rows) {
     FSL_CHECK_EQ((*record)[0], fostlib::json(3));
     FSL_CHECK(++record == records.end());
 }
-
