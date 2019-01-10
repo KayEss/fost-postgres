@@ -1,8 +1,8 @@
-/*
-    Copyright 2015-2016, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2015-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -44,20 +44,16 @@ namespace {
 
 
 void fostlib::pg::createdb(const json &dsn, const string &dbname) {
-    pqxx::connection cnx(dsn_from_json(dsn).first.underlying());
+    pqxx::connection cnx(static_cast<std::string>(dsn_from_json(dsn).first));
     pqxx::nontransaction tran(cnx);
-    tran.exec(
-            "CREATE DATABASE \"" + coerce<utf8_string>(dbname).underlying()
-            + "\"");
+    tran.exec("CREATE DATABASE \"" + static_cast<std::string>(dbname) + "\"");
 }
 
 
 void fostlib::pg::dropdb(const json &dsn, const string &dbname) {
-    pqxx::connection cnx(dsn_from_json(dsn).first.underlying());
+    pqxx::connection cnx(static_cast<std::string>(dsn_from_json(dsn).first));
     pqxx::nontransaction tran(cnx);
-    tran.exec(
-            "DROP DATABASE \"" + coerce<utf8_string>(dbname).underlying()
-            + "\"");
+    tran.exec("DROP DATABASE \"" + static_cast<std::string>(dbname) + "\"");
 }
 
 
@@ -304,6 +300,6 @@ fostlib::pg::unbound_procedure
         fostlib::pg::connection::procedure(const fostlib::utf8_string &cmd) {
     static std::atomic<unsigned int> number;
     std::string name = "sp_anon_" + std::to_string(++number);
-    pimpl->pqcnx.prepare(name, cmd.underlying());
+    pimpl->pqcnx.prepare(name, static_cast<std::string>(cmd));
     return unbound_procedure(*this, name);
 }
