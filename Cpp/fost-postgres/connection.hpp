@@ -1,8 +1,8 @@
-/**
-    Copyright 2015-2019, Felspar Co Ltd. <http://support.felspar.com/>
-
+/*
+    Copyright 2015, Felspar Co Ltd. http://support.felspar.com/
     Distributed under the Boost Software License, Version 1.0.
-    See <http://www.boost.org/LICENSE_1_0.txt>
+    See accompanying file LICENSE_1_0.txt or copy at
+        http://www.boost.org/LICENSE_1_0.txt
 */
 
 
@@ -22,12 +22,12 @@ struct fostlib::pg::connection::impl {
     json configuration;
 
     impl(const fostlib::utf8_string &dsn)
-    : pqcnx(static_cast<std::string>(dsn.underlying())),
+    : pqcnx(dsn.underlying()),
       trans(new transaction_type(pqcnx)),
       configuration(dsn.underlying().c_str()) {}
 
     impl(const std::pair<fostlib::utf8_string, fostlib::json> &dsn)
-    : pqcnx(static_cast<std::string>(dsn.first.underlying())),
+    : pqcnx(dsn.first.underlying()),
       trans(new transaction_type(pqcnx)),
       configuration(dsn.second) {}
 };
