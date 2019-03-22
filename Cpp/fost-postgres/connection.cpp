@@ -231,6 +231,14 @@ fostlib::pg::recordset fostlib::pg::connection::insert(
 
 fostlib::pg::connection &fostlib::pg::connection::update(
         const char *relation, const json &keys, const json &values) {
+    update(relation, keys, values, {});
+    return *this;
+}
+fostlib::pg::recordset fostlib::pg::connection::update(
+        const char *relation,
+        const json &keys,
+        const json &values,
+        const std::vector<fostlib::string> &returning) {
     string sql("UPDATE "), updates, where;
     sql += relation;
     sql += " SET ";
@@ -253,8 +261,11 @@ fostlib::pg::connection &fostlib::pg::connection::update(
         }
     }
     sql += updates + " WHERE " + where;
-    exec(coerce<utf8_string>(sql));
-    return *this;
+    if (returning.size()) {
+        auto ret_vals = returning_vals(returning);
+        sql += " RETURNING " + ret_vals;
+    }
+    return exec(coerce<utf8_string>(sql));
 }
 
 

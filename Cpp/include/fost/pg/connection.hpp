@@ -1,8 +1,8 @@
-/*
-    Copyright 2015-2016, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2015-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -81,9 +81,14 @@ namespace fostlib {
                     insert(const char *relation,
                            const json &values,
                            const std::vector<fostlib::string> &returning);
-            /// Performa one row UPDATE statement. Give the keys and values
+            /// Perform a one row UPDATE statement. Give the keys and values
             connection &update(
                     const char *relation, const json &keys, const json &values);
+            recordset
+                    update(const char *relation,
+                           const json &keys,
+                           const json &values,
+                           const std::vector<fostlib::string> &returning);
             /// Perform an UPSERT (INSERT/CONFLICT). Give the keys and values
             /// and optionally a returning list
             connection &upsert(
