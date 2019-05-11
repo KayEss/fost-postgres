@@ -1,6 +1,6 @@
 /**
     Copyright 2015-2019, Felspar Co Ltd. <http://support.felspar.com/>
-    
+
     Distributed under the Boost Software License, Version 1.0.
     See <http://www.boost.org/LICENSE_1_0.txt>
 */
@@ -51,7 +51,8 @@ std::vector<fostlib::nullable<fostlib::string>>
             const auto table =
                     pimpl->records.column_table(coerce<int>(names.size()));
             if (colname.endswith("__tableoid")) {
-                oid_prefix[table] = colname.substr(0, colname.length() - 8);
+                oid_prefix[table] =
+                        colname.substr(0, colname.code_points() - 8);
                 names.push_back(colname);
             } else if (oid_prefix.find(table) != oid_prefix.end()) {
                 names.push_back(oid_prefix[table] + colname);

@@ -32,7 +32,7 @@ fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
         if (a.isnull()) {
             sp();
         } else {
-            sp(fostlib::coerce<fostlib::string>(a).c_str());
+            sp(fostlib::coerce<fostlib::string>(a).shrink_to_fit());
         }
     }
     return recordset(std::make_unique<recordset::impl>(sp.exec()));

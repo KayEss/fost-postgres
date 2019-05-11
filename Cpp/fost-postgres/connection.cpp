@@ -126,9 +126,11 @@ namespace {
         if (val.isnull()) {
             return "NULL";
         } else if (val.isobject()) {
-            return t.quote(fostlib::json::unparse(val, false).std_str());
+            return t.quote(static_cast<std::string>(
+                    fostlib::json::unparse(val, false)));
         } else {
-            return t.quote(fostlib::coerce<fostlib::string>(val).std_str());
+            return t.quote(static_cast<std::string>(
+                    fostlib::coerce<fostlib::string>(val)));
         }
     }
     template<typename T>
@@ -165,14 +167,15 @@ namespace {
 
 
 fostlib::pg::connection &fostlib::pg::connection::zoneinfo(const string &zi) {
-    exec("SET TIME ZONE " + pimpl->trans->quote(zi.std_str()));
+    exec("SET TIME ZONE " + pimpl->trans->quote(static_cast<std::string>(zi)));
     return *this;
 }
 
 
 fostlib::pg::connection &
         fostlib::pg::connection::set_session(const string &n, const string &v) {
-    exec("SET \"" + n.std_str() + "\" = " + pimpl->trans->quote(v.std_str()));
+    exec("SET \"" + static_cast<std::string>(n)
+         + "\" = " + pimpl->trans->quote(static_cast<std::string>(v)));
     return *this;
 }
 
