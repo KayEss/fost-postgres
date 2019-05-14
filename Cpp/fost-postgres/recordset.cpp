@@ -167,15 +167,15 @@ fostlib::pg::recordset::const_iterator::const_iterator()
 fostlib::pg::recordset::const_iterator::const_iterator(
         const const_iterator &other)
 : pimpl(new impl(
-          other.pimpl->rs, other.pimpl->position, other.pimpl->row.size())) {
+        other.pimpl->rs, other.pimpl->position, other.pimpl->row.size())) {
     pimpl->row = other.pimpl->row;
 }
 fostlib::pg::recordset::const_iterator::const_iterator(
         recordset::impl &rs, bool begin)
 : pimpl(new impl(
-          &rs,
-          begin ? rs.records.begin() : rs.records.end(),
-          rs.records.columns())) {
+        &rs,
+        begin ? rs.records.begin() : rs.records.end(),
+        rs.records.columns())) {
     if (pimpl->position != rs.records.end()) {
         fillin(rs.types, pimpl->position, pimpl->row.fields);
     }
