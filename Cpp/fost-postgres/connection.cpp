@@ -32,7 +32,7 @@ namespace {
                 fostlib::insert(effective, key, conf[key]);
                 dsn += fostlib::utf8_string(key) + "='"
                         + fostlib::coerce<fostlib::utf8_string>(
-                                  fostlib::coerce<fostlib::string>(conf[key]))
+                                fostlib::coerce<fostlib::string>(conf[key]))
                         + "' ";
             }
         }
