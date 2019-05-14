@@ -1,8 +1,8 @@
-/*
-    Copyright 2016, Felspar Co Ltd. http://support.felspar.com/
+/**
+    Copyright 2016-2019, Felspar Co Ltd. <http://support.felspar.com/>
+
     Distributed under the Boost Software License, Version 1.0.
-    See accompanying file LICENSE_1_0.txt or copy at
-        http://www.boost.org/LICENSE_1_0.txt
+    See <http://www.boost.org/LICENSE_1_0.txt>
 */
 
 
@@ -32,7 +32,7 @@ namespace fostlib {
           public:
             const std::string name;
 
-            recordset exec(const std::vector<fostlib::string> &args);
+            recordset exec(std::vector<fostlib::string> args);
             recordset exec(const std::vector<fostlib::json> &args);
         };
 
