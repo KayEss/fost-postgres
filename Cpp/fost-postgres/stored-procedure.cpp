@@ -10,6 +10,25 @@
 #include <fost/pg/stored-procedure.hpp>
 #include "connection.hpp"
 #include "recordset.hpp"
+#include <pqxx/prepared_statement>
+
+
+namespace {
+    template<typename Iter, typename Func>
+    auto exec_prepared(
+            pqxx::transaction<pqxx::serializable> &trans,
+            std::string const &name,
+            Iter begin,
+            Iter end,
+            Func transform) {
+        std::vector<char const *> dynargs;
+        std::transform(begin, end, std::back_inserter(dynargs), transform);
+        return trans.exec_prepared(
+                name,
+                pqxx::prepare::make_dynamic_params(
+                        dynargs.begin(), dynargs.end()));
+    }
+}
 
 
 fostlib::pg::unbound_procedure::unbound_procedure(
@@ -18,22 +37,28 @@ fostlib::pg::unbound_procedure::unbound_procedure(
 
 
 fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
-        const std::vector<fostlib::string> &args) {
-    auto sp = cnx.pimpl->trans->prepared(name);
-    for (const auto &a : args) sp(static_cast<std::string>(a));
-    return recordset(std::make_unique<recordset::impl>(sp.exec()));
+        std::vector<fostlib::string> args) {
+    return recordset(std::make_unique<recordset::impl>(exec_prepared(
+            *cnx.pimpl->trans, name, args.begin(), args.end(),
+            [](fostlib::string &arg) { return arg.shrink_to_fit(); })));
 }
 
 
 fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
-        const std::vector<fostlib::json> &args) {
-    auto sp = cnx.pimpl->trans->prepared(name);
-    for (const auto &a : args) {
-        if (a.isnull()) {
-            sp();
-        } else {
-            sp(fostlib::coerce<fostlib::string>(a).c_str());
-        }
-    }
-    return recordset(std::make_unique<recordset::impl>(sp.exec()));
+        const std::vector<fostlib::json> &jsargs) {
+    std::vector<std::optional<std::string>> args;
+    std::transform(
+            jsargs.begin(), jsargs.end(), std::back_inserter(args),
+            [](fostlib::json arg) -> std::optional<std::string> {
+                if (arg.isnull()) {
+                    return {};
+                } else {
+                    return static_cast<std::string>(
+                            fostlib::coerce<fostlib::string>(arg));
+                }
+            });
+    return recordset(std::make_unique<recordset::impl>(exec_prepared(
+            *cnx.pimpl->trans, name, args.begin(), args.end(), [](auto &arg) {
+                return arg.has_value() ? arg.value().c_str() : nullptr;
+            })));
 }
