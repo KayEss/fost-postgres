@@ -14,19 +14,16 @@
 
 
 namespace {
-    template<typename Iter, typename Func>
+    template<typename Coll, typename Func>
     auto exec_prepared(
             pqxx::transaction<pqxx::serializable> &trans,
             std::string const &name,
-            Iter begin,
-            Iter end,
+            Coll &collection,
             Func transform) {
-        std::vector<char const *> dynargs;
-        std::transform(begin, end, std::back_inserter(dynargs), transform);
         return trans.exec_prepared(
                 name,
                 pqxx::prepare::make_dynamic_params(
-                        dynargs.begin(), dynargs.end()));
+                        collection, transform));
     }
 }
 
@@ -39,7 +36,7 @@ fostlib::pg::unbound_procedure::unbound_procedure(
 fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
         std::vector<fostlib::string> args) {
     return recordset(std::make_unique<recordset::impl>(exec_prepared(
-            *cnx.pimpl->trans, name, args.begin(), args.end(),
+            *cnx.pimpl->trans, name, args,
             [](fostlib::string &arg) { return arg.shrink_to_fit(); })));
 }
 
@@ -58,7 +55,7 @@ fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
                 }
             });
     return recordset(std::make_unique<recordset::impl>(exec_prepared(
-            *cnx.pimpl->trans, name, args.begin(), args.end(), [](auto &arg) {
+            *cnx.pimpl->trans, name, args, [](auto &arg) {
                 return arg.has_value() ? arg.value().c_str() : nullptr;
             })));
 }
