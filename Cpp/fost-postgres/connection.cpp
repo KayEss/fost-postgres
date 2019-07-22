@@ -125,7 +125,7 @@ namespace {
     fostlib::string value(T &t, const fostlib::json &val) {
         if (val.isnull()) {
             return "NULL";
-        } else if (val.isobject()) {
+        } else if (val.isobject() || val.isarray()) {
             return t.quote(static_cast<std::string>(
                     fostlib::json::unparse(val, false)));
         } else {
