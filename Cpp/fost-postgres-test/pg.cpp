@@ -52,6 +52,16 @@ namespace {
         FSL_CHECK(records.begin() != records.end());
         FSL_CHECK(++records.begin() == records.end());
     }
+    // Use cnx.select() to access value() for string transformation
+    void select_for_transformation_test(fostlib::json const target) {
+        fostlib::json values;
+        fostlib::insert(values, "table_name", target); // Reuse table_name column from information_schema table
+        fostlib::pg::connection cnx;
+        auto records = cnx.select("information_schema.tables", values);
+        auto record = records.begin();
+        // Should return null, because there is no match
+        FSL_CHECK_EQ((*record)[0], fostlib::json());
+    }
 }
 FSL_TEST_FUNCTION(type_null) { check("SELECT NULL", fostlib::json()); }
 FSL_TEST_FUNCTION(type_bool) {
@@ -88,4 +98,36 @@ FSL_TEST_FUNCTION(rows) {
     ++record;
     FSL_CHECK_EQ((*record)[0], fostlib::json(3));
     FSL_CHECK(++record == records.end());
+}
+
+FSL_TEST_FUNCTION(transform_array_to_string_type) {
+    fostlib::json arr;
+    fostlib::jcursor().push_back(arr, fostlib::json());
+    FSL_CHECK(arr.isarray());
+    select_for_transformation_test(arr);
+}
+
+FSL_TEST_FUNCTION(transform_object_to_string_type) {
+    fostlib::json obj;
+    fostlib::insert(obj, "", fostlib::json());
+    FSL_CHECK(obj.isobject());
+    select_for_transformation_test(obj);
+}
+
+FSL_TEST_FUNCTION(transform_number_to_string_type) {
+    auto atom = fostlib::json(5);
+    FSL_CHECK(atom.isatom());
+    select_for_transformation_test(atom);
+}
+
+FSL_TEST_FUNCTION(transform_boolean_to_string_type) {
+    auto boolean = fostlib::json(false);
+    FSL_CHECK(boolean.isatom());
+    select_for_transformation_test(boolean);
+}
+
+FSL_TEST_FUNCTION(transform_null_to_string_type) {
+    auto n = fostlib::json();
+    FSL_CHECK(n.isnull());
+    select_for_transformation_test(n);
 }
