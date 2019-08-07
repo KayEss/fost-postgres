@@ -1,3 +1,6 @@
+2019-08-07 Pattarawut Imamnuaysup <pattarawut@hot-now.com>
+ Add array insert support.
+
 2019-03-22  Kirit Saelensminde  <kirit@felspar.com>
  Add `RETURNING` support to connection's `update` method.
 
