@@ -122,10 +122,10 @@ namespace {
     }
 
     template<typename T>
-    fostlib::string value(T &t, const fostlib::json &val) {
+    fostlib::string value(T &t, fostlib::json const &val) {
         if (val.isnull()) {
             return "NULL";
-        } else if (val.isobject()) {
+        } else if (not val.isatom()) {
             return t.quote(static_cast<std::string>(
                     fostlib::json::unparse(val, false)));
         } else {
