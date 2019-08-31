@@ -52,6 +52,15 @@ namespace {
         FSL_CHECK(records.begin() != records.end());
         FSL_CHECK(++records.begin() == records.end());
     }
+    // We don't care about the table, we want to test the transformation and it shouldn't throw an error
+    void use_value_in_where_clause(fostlib::json const target) {
+        fostlib::json values;
+        fostlib::insert(values, "table_name", target);
+        fostlib::pg::connection cnx;
+        auto records = cnx.select("information_schema.tables", values);
+        auto record = records.begin();
+        FSL_CHECK_EQ((*record)[0], fostlib::json());
+    }
 }
 FSL_TEST_FUNCTION(type_null) { check("SELECT NULL", fostlib::json()); }
 FSL_TEST_FUNCTION(type_bool) {
@@ -88,4 +97,36 @@ FSL_TEST_FUNCTION(rows) {
     ++record;
     FSL_CHECK_EQ((*record)[0], fostlib::json(3));
     FSL_CHECK(++record == records.end());
+}
+
+FSL_TEST_FUNCTION(transform_array_to_string_type) {
+    fostlib::json arr;
+    fostlib::jcursor().push_back(arr, fostlib::json());
+    FSL_CHECK(arr.isarray());
+    use_value_in_where_clause(arr);
+}
+
+FSL_TEST_FUNCTION(transform_object_to_string_type) {
+    fostlib::json obj;
+    fostlib::insert(obj, "", fostlib::json());
+    FSL_CHECK(obj.isobject());
+    use_value_in_where_clause(obj);
+}
+
+FSL_TEST_FUNCTION(transform_number_to_string_type) {
+    auto atom = fostlib::json(5);
+    FSL_CHECK(atom.isatom());
+    use_value_in_where_clause(atom);
+}
+
+FSL_TEST_FUNCTION(transform_boolean_to_string_type) {
+    auto boolean = fostlib::json(false);
+    FSL_CHECK(boolean.isatom());
+    use_value_in_where_clause(boolean);
+}
+
+FSL_TEST_FUNCTION(transform_null_to_string_type) {
+    auto n = fostlib::json();
+    FSL_CHECK(n.isnull());
+    use_value_in_where_clause(n);
 }
