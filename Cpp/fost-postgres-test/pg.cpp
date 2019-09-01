@@ -52,7 +52,8 @@ namespace {
         FSL_CHECK(records.begin() != records.end());
         FSL_CHECK(++records.begin() == records.end());
     }
-    // We don't care about the table, we want to test the transformation and it shouldn't throw an error
+    // We don't care about the table, we want to test the transformation and it
+    // shouldn't throw an error
     void use_value_in_where_clause(fostlib::json const target) {
         fostlib::json values;
         fostlib::insert(values, "table_name", target);
