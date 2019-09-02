@@ -22,8 +22,7 @@ namespace {
             Func transform) {
         return trans.exec_prepared(
                 name,
-                pqxx::prepare::make_dynamic_params(
-                        collection, transform));
+                pqxx::prepare::make_dynamic_params(collection, transform));
     }
 }
 
@@ -54,8 +53,8 @@ fostlib::pg::recordset fostlib::pg::unbound_procedure::exec(
                             fostlib::coerce<fostlib::string>(arg));
                 }
             });
-    return recordset(std::make_unique<recordset::impl>(exec_prepared(
-            *cnx.pimpl->trans, name, args, [](auto &arg) {
+    return recordset(std::make_unique<recordset::impl>(
+            exec_prepared(*cnx.pimpl->trans, name, args, [](auto &arg) {
                 return arg.has_value() ? arg.value().c_str() : nullptr;
             })));
 }
