@@ -186,8 +186,9 @@ fostlib::pg::recordset::const_iterator::const_iterator(
 fostlib::pg::recordset::const_iterator::~const_iterator() = default;
 
 
-fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::
-        operator=(const fostlib::pg::recordset::const_iterator &other) {
+fostlib::pg::recordset::const_iterator &
+        fostlib::pg::recordset::const_iterator::operator=(
+                const fostlib::pg::recordset::const_iterator &other) {
     pimpl.reset(new impl(
             other.pimpl->rs, other.pimpl->position, other.pimpl->row.size()));
     pimpl->row = other.pimpl->row;
@@ -195,8 +196,8 @@ fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::
 }
 
 
-bool fostlib::pg::recordset::const_iterator::
-        operator==(const const_iterator &other) const {
+bool fostlib::pg::recordset::const_iterator::operator==(
+        const const_iterator &other) const {
     if (pimpl && other.pimpl) {
         return pimpl->position == other.pimpl->position;
     } else {
@@ -205,25 +206,25 @@ bool fostlib::pg::recordset::const_iterator::
 }
 
 
-const fostlib::pg::record *fostlib::pg::recordset::const_iterator::
-        operator->() const {
+const fostlib::pg::record *
+        fostlib::pg::recordset::const_iterator::operator->() const {
     return &pimpl->row;
 }
-const fostlib::pg::record &fostlib::pg::recordset::const_iterator::
-        operator*() const {
+const fostlib::pg::record &
+        fostlib::pg::recordset::const_iterator::operator*() const {
     return pimpl->row;
 }
 
 
-fostlib::pg::recordset::const_iterator &fostlib::pg::recordset::const_iterator::
-        operator++() {
+fostlib::pg::recordset::const_iterator &
+        fostlib::pg::recordset::const_iterator::operator++() {
     if (++pimpl->position != pimpl->rs->records.end()) {
         fillin(pimpl->rs->types, pimpl->position, pimpl->row.fields);
     }
     return *this;
 }
-fostlib::pg::recordset::const_iterator fostlib::pg::recordset::const_iterator::
-        operator++(int) {
+fostlib::pg::recordset::const_iterator
+        fostlib::pg::recordset::const_iterator::operator++(int) {
     auto result = *this;
     this->operator++();
     return result;
