@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.10)
+project(fost-postgres-travis)
 
 # Opt in to the tests we want to run
 add_custom_target(check)
