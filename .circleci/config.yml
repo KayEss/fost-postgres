@@ -4,12 +4,14 @@ executors:
   clang:
     docker:
     - image: fost/circleci
+      user: postgres
     environment:
       CC: clang
       CXX: clang++
   gcc:
     docker:
     - image: fost/circleci
+      user: postgres
     environment:
       CC: gcc-10
       CXX: g++-10
@@ -43,6 +45,12 @@ jobs:
       - run:
           name: check tests
           command: ninja -j1 -C .circleci check
+      - run:
+          name: postgres tests
+          command: |
+            pg_ctlcluster 12 main start
+            ninja -j1 -C .circleci pgtest
+
 workflows:
   all-tests:
     jobs:
@@ -51,4 +59,3 @@ workflows:
             parameters:
               compiler: [gcc, clang]
               variant: [Debug, Release]
-
