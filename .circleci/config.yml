@@ -36,6 +36,7 @@ jobs:
             git clone git@github.com:hotkit/fost-crypto.git .circleci/crypto
             git clone git@github.com:hotkit/fost-internet.git .circleci/fost-internet
             git clone git@github.com:hotkit/threading.git .circleci/threading
+            git clone git@github.com:jtv/libpqxx.git .circleci/libpqxx
       - run:
           name: cmake
           command: cmake -G Ninja -S .circleci -B .circleci -DCMAKE_BUILD_TYPE=<< parameters.variant >>
